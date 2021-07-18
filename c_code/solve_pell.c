@@ -132,7 +132,6 @@ void two_Qprime_in_range(long min, long max, char* res, mpz_t primes[], int num_
             res[i] = 1;
         }
     }
-
 }
 
 
@@ -158,23 +157,29 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
     mpz_mul_2exp(cutoff, cutoff, BIT_CUTOFF);
 
     // intialization:
-    mpz_set(p_k[0], zero);
-    mpz_set(q_k[0], one);
+    mpz_init_set(p_k[0], zero);
+    mpz_init_set(q_k[0], one);
+    mpz_init(a_k[0]);
     mpz_sqrt(a_k[0], d);
     mpz_set(numerators[0], zero);
-    mpz_set(numerators[1], one);
-    mpz_set(numerators[2], a_k[0]);
-    mpz_set(denominators[0], one);
-    mpz_set(denominators[1], zero);
-    mpz_set(denominators[2], one);
+    mpz_init_set(numerators[1], one);
+    mpz_init_set(numerators[2], a_k[0]);
+    mpz_init_set(denominators[0], one);
+    mpz_init_set(denominators[1], zero);
+    mpz_init_set(denominators[2], one);
     int index = 2;
-
+    
     // main loop
     while(!check_pell(numerators[index], denominators[index], d)) {
         if (mpz_cmp(numerators[index], cutoff) >= 0) {
             mpz_set(result, zero);
             return; // this pell equation does not give useful smooths
         }
+        mpz_init(p_k[index-1]);
+        mpz_init(q_k[index-1]);
+        mpz_init(a_k[index-1]);
+        mpz_init(numerators[index+1]);
+        mpz_init(denominators[index+1]);
         // generate the next convergent:
         // p_(k+1)
         // set_p_k_next(p_k[index-1], a_k[index-2], q_k[index-2], p_k[index-2]);
