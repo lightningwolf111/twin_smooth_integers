@@ -6,13 +6,11 @@
 #include "helpers.h"
 
 // number of primes below BOUND
-#define NUM_PRIMES 1862
+#define NUM_PRIMES 3
 // smoothness bound
-#define BOUND 16000
+#define BOUND 6
 // only look for numbers smaller than this many bits
 #define CUTOFF 257
-
-
 
 int main(int argc, char **argv) {
     clock_t start_time = clock(), diff_time;
@@ -67,6 +65,15 @@ int main(int argc, char **argv) {
 
     int msec = diff_time * 1000 / CLOCKS_PER_SEC;
     printf("Time taken %d seconds %d milliseconds", msec/1000, msec%1000);
+
+    mpz_clear(upper_bound);
+    mpz_clear(b);
+    mpz_clear(value);
+    mpz_clear(lower);
+    mpz_clear(higher);
+    for (int i = 0; i < NUM_PRIMES; i++) {
+        mpz_clear(primes[i]);
+    }
 
     return EXIT_SUCCESS;
 
