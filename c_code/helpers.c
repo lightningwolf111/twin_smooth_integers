@@ -82,12 +82,55 @@ bool check_second_poly(mpz_t m, mpz_t primes[]) {
     mpz_init(res1);
     mpz_add_ui(res1, res1, 1);
     add_term(2, 1, res1, m);
-    //gmp_printf("First val: %Zd \n", res1);
     if (! is_smooth(res1, primes, NUM_PRIMES)) {
 	mpz_clear(res1);
         return false;
     }
     mpz_clear(res1);
+    return true;
+}
+
+bool check_sixth_poly(mpz_t m, mpz_t primes[]) { // 2*(16*m^2 + 16*m + 1)*(4*m + 3)*(4*m + 1)*(2*m + 1)
+    mpz_t res1, res2, res3, res4;
+    mpz_init(res1);
+    mpz_add_ui(res1, res1, 1);
+    add_term(2, 1, res1, m);
+    if (! is_smooth(res1, primes, NUM_PRIMES)) {
+	mpz_clear(res1);
+        return false;
+    }
+    mpz_init(res2);
+    mpz_add_ui(res2, res2, 1);
+    add_term(4, 1, res2, m);
+    if (! is_smooth(res2, primes, NUM_PRIMES)) {
+	mpz_clear(res1);
+	mpz_clear(res2);
+        return false;
+    }
+    mpz_init(res3);
+    mpz_add_ui(res3, res3, 3);
+    add_term(4, 1, res3, m);
+    if (! is_smooth(res3, primes, NUM_PRIMES)) {
+	mpz_clear(res1);
+	mpz_clear(res2);
+	mpz_clear(res3);
+        return false;
+    }
+    mpz_init(res4);
+    mpz_add_ui(res4, res4, 1);
+    add_term(16, 1, res4, m);
+    add_term(16, 2, res4, m);
+    if (! is_smooth(res4, primes, NUM_PRIMES)) {
+	mpz_clear(res1);
+	mpz_clear(res2);
+	mpz_clear(res3);
+	mpz_clear(res4);
+        return false;
+    }
+    mpz_clear(res1);
+    mpz_clear(res2);
+    mpz_clear(res3);
+    mpz_clear(res4);
     return true;
 }
 

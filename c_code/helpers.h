@@ -19,6 +19,8 @@ extern bool check_fourth_poly(mpz_t m, mpz_t primes[]);
 // the nth solution of a Pell equation where the 2n th solution
 // also gives a smooth pair.
 extern bool check_second_poly(mpz_t m, mpz_t primes[]);
+// Exactly like the two above, but checks from n to 6n.
+extern bool check_sixth_poly(mpz_t m, mpz_t primes[]);
 // Finds smooths in the range [min, max) that factor in the array
 // of primes given (who's length must be num_primes). Returns this
 // through the output parameter res, which has values set to 1 for
