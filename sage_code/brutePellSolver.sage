@@ -440,9 +440,9 @@ def fundamentalPellSolConvergentsExperimental_2(d):
         index = index + 1
         numerators.append(cont_frac[index - 2] * numerators[index - 1] + numerators[index - 2])
         denominators.append(cont_frac[index - 2] * denominators[index - 1] + denominators[index - 2])
-        # print("Numerator at " + str(index) + " is " + str(numerators[index]))
-        # print("Denominator at " + str(index) + " is " + str(denominators[index]))
-        if (numerators[index] > 2**260):
+        print("Numerator at " + str(index) + " is " + str(numerators[index]))
+        print("Denominator at " + str(index) + " is " + str(denominators[index]))
+        if (numerators[index] > 2**500):
             return -1
     # print(time.time() - st)
     print(index)
@@ -460,7 +460,7 @@ def pellWhichConvergent(d):
         index = index + 1
         numerators.append(cont_frac[index - 2] * numerators[index - 1] + numerators[index - 2])
         denominators.append(cont_frac[index - 2] * denominators[index - 1] + denominators[index - 2])
-        if (numerators[index] > 2**260):
+        if (numerators[index] > 2**300):
             return -1
     return index
 

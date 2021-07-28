@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
         sieve_interval_pell(curr_start, curr_start + step, fp, b, primes);
         curr_start += step;
         num_steps++;
-        if (num_steps % 1000 == 0) {
+        if (num_steps % 1 == 0) {
             printf("Steps Complete: %ld\n", num_steps);
         }
     }
@@ -207,6 +207,17 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
     while(!check_pell(numerators[index], denominators[index], d)) {
         if (mpz_cmp(numerators[index], cutoff) >= 0) {
             mpz_set(result, zero);
+            for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
+                mpz_clear(p_k[i]);
+                mpz_clear(q_k[i]);
+                mpz_clear(a_k[i]);
+            }
+            for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
+                mpz_clear(numerators[i]);
+                mpz_clear(denominators[i]);
+            }
+            mpz_clear(psquared);
+            mpz_clear(p_plus_root_d);
             return; // this pell equation does not give useful smooths
         }
         mpz_init(p_k[index-1]);
