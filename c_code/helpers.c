@@ -16,7 +16,7 @@ void primes_up_to_b(mpz_t* ptr, mpz_t b) {
 		mpz_nextprime(curr, curr);
 		index++;
 	}
-	// printf("INDEX: %d", index);
+	mpz_clear(curr);
 }
 
 
@@ -32,8 +32,12 @@ bool is_smooth(mpz_t arg, mpz_t primes[], int num_primes) {
 	mpz_t one;
 	mpz_init_set_str(one, "1", 10);
 	if (mpz_cmp(check, one) == 0) {
+		mpz_clear(check);
+		mpz_clear(one);
 		return true;
 	}
+	mpz_clear(check);
+	mpz_clear(one);
 	return false;
 }
 
