@@ -11,13 +11,16 @@
 
 
 int main(int argc, char **argv) {
+	int which;
 	long start, end, step;
-	printf("Start: \n");
+	gmp_printf("Which successive solution to check (one of {4, 6, 7}): \n");
+	gmp_scanf("%d", &which);
+	gmp_printf("Start: \n");
 	gmp_scanf("%ld", &start);
 	gmp_printf("End: \n");
 	gmp_scanf("%ld", &end);
 	gmp_printf("Step: \n");
-        gmp_scanf("%ld", &step);
+    gmp_scanf("%ld", &step);
 	
 
 	mpz_t primes[NUM_PRIMES];
@@ -44,10 +47,19 @@ int main(int argc, char **argv) {
 				// printf("smooth pair: %ld \n", i + curr_start);
 				mpz_t m;
 				mpz_init_set_si(m, i + curr_start);
-				if (check_fourth_poly(m, primes)) {
-                	                printf("SMOOTH: %ld \n ", i + curr_start);
+				bool found = false;
+				if (which == 4) {
+				    found = check_fourth_poly(m, primes);
+				} else if (which == 6) {
+				    found = check_sixth_poly(m, primes);
+				} else if (which == 7) {
+				    found = check_seventh_poly(m, primes);
+				}
+				
+				if (found) {
+                	                //printf("SMOOTH: %ld \n ", i + curr_start);
 					char str[257];
-					sprintf(str, "%ld \n", i+curr_start);
+					sprintf(str, "%ld\n", i+curr_start);
 					// str[257] = '\n';
         	                	fputs(str, fp);
 				}

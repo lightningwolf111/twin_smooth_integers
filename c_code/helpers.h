@@ -21,6 +21,8 @@ extern bool check_fourth_poly(mpz_t m, mpz_t primes[]);
 extern bool check_second_poly(mpz_t m, mpz_t primes[]);
 // Exactly like the two above, but checks from n to 6n.
 extern bool check_sixth_poly(mpz_t m, mpz_t primes[]);
+// Exactly like the two above, but checks from n to 7n.
+extern bool check_seventh_poly(mpz_t m, mpz_t primes[]);
 // Finds smooths in the range [min, max) that factor in the array
 // of primes given (who's length must be num_primes). Returns this
 // through the output parameter res, which has values set to 1 for
