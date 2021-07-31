@@ -87,12 +87,12 @@ int main(int argc, char **argv) {
         sieve_interval_pell(curr_start, curr_start + step, fp, b, primes);
         curr_start += step;
         num_steps++;
-        if (num_steps % 1 == 0) {
+        if (num_steps % 100 == 0) {
             printf("Steps Complete: %ld\n", num_steps);
         }
     }
     
-    printf("Equations solved: %ld", counter);
+    printf("Equations solved: %ld\n", counter);
 
     fclose(fp);
 
