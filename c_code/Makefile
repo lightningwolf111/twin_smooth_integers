@@ -1,4 +1,4 @@
-PROGS = solve_pell solve_pell_parallel factor_method pell_sols_4_6_7
+PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel
 
 all :$(PROGS)
 
@@ -13,6 +13,12 @@ factor_method: factor_method.c helpers.c helpers.h
 
 pell_sols_4_6_7: pell_sols_4_6_7.c helpers.c helpers.h
 	gcc -g -o pell_sols_4_6_7 pell_sols_4_6_7.c helpers.c -lgmp
+
+read_check_2_4: read_check_2_4 helpers.c helpers.h
+	gcc -g -o read_check_2_4 read_check_2_4.c helpers.c -lgmp
+
+read_max: read_max helpers.c helpers.h
+	gcc -g -o read_max read_max.c helpers.c -lgmp
 
 clean:
 	rm -f *.o $(PROGS) fourth_pell_solution

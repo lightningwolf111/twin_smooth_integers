@@ -160,6 +160,21 @@ bool check_seventh_poly(mpz_t m, mpz_t primes[]) { // (64*m^3 + 112*m^2 + 56*m +
     return true;
 }
 
+void value_of_second_poly(mpz_t m, mpz_t result) {
+    mpz_add_ui(result, result, 1);
+    add_term(8, 1, result, m);
+    add_term(8, 2, result, m);
+}
+
+void value_of_fourth_poly(mpz_t m, mpz_t result) {  // 128*m^4 + 256*m^3 + 160*m^2 + 32*m + 1
+    mpz_add_ui(result, result, 1);
+    add_term(32, 1, result, m);
+    add_term(160, 2, result, m);
+    add_term(256, 3, result, m);
+    add_term(128, 4, result, m);
+}
+
+
 void smooths_in_range(mpz_t primes[], long min, long max, int num_primes, char* res) { // including min, excluding max
 	long nums[max - min];
 	for (long i = 0; i < max - min; i++) {
