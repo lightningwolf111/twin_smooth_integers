@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include "helpers.h"
 
-// number of primes below 32000
-#define NUM_PRIMES 3432 
+// number of primes below 32768
+#define NUM_PRIMES 3512
 // smoothness bound
-#define BOUND 32000
+#define BOUND 32768
 
 
 int main(int argc, char **argv) {

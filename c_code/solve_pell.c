@@ -10,10 +10,10 @@
 // The cutoff for continued fractions. Will only find pairs up to this cutoff-1 bits from
 // fundamental solutions.
 #define BIT_CUTOFF (258)
-// number of primes below 32000
-#define NUM_PRIMES 3432
+// number of primes below 32768
+#define NUM_PRIMES 3512
 // smoothness bound
-#define BOUND 32000
+#define BOUND 32768
 
 // The number of Pell equations solved.
 long counter;

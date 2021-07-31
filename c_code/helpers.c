@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// number of primes below 32000
-#define NUM_PRIMES 3432 
+// number of primes below 32768
+#define NUM_PRIMES 3512 
 // smoothness bound
-#define BOUND 32000
+#define BOUND 32768
 
 void primes_up_to_b(mpz_t* ptr, mpz_t b) {
 	int index = 0;

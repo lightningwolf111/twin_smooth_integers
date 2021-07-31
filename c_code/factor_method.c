@@ -6,9 +6,9 @@
 #include "helpers.h"
 
 // number of primes below BOUND
-#define NUM_PRIMES 3
+#define NUM_PRIMES 3512
 // smoothness bound
-#define BOUND 6
+#define BOUND 32768
 // only look for numbers smaller than this many bits
 #define CUTOFF 257
 
