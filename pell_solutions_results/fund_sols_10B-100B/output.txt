@@ -1,0 +1,3 @@
+Sieving Time (thread 0): 71.148092 seconds
+Solving Time (thread 0): 131.577423 seconds
+Total Time taken 8940.482217 seconds
