@@ -16,7 +16,7 @@
 // smoothness bound
 #define BOUND 32768
 // number of threads
-#define NUM_THREADS 4
+#define NUM_THREADS 64
 
 // The number of Pell equations solved.
 long counter[NUM_THREADS];
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
         solving_time[thread] = 0;
 
         char file_path[100];
-        sprintf(file_path, "/tmp/res_%d.txt", thread);
+        sprintf(file_path, "results/res_%d_%ld-%ld.txt", thread, start, end);
 
         fp[thread] = fopen(file_path, "w");
         if (fp[thread] == NULL) {
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
             sieve_interval_pell(curr_start, curr_start + step, fp[thread], b, primes, thread);
             curr_start += step;
             num_steps++;
-            if (num_steps % 100 == 0) {
+            if (num_steps % 1000 == 0) {
                 printf("Steps complete (thread %d): %ld\n", thread, num_steps);
             }
         }
