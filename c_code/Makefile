@@ -14,10 +14,10 @@ factor_method: factor_method.c helpers.c helpers.h
 pell_sols_4_6_7: pell_sols_4_6_7.c helpers.c helpers.h
 	gcc -g -o pell_sols_4_6_7 pell_sols_4_6_7.c helpers.c -lgmp
 
-read_check_2_4: read_check_2_4 helpers.c helpers.h
+read_check_2_4: read_check_2_4.c helpers.c helpers.h
 	gcc -g -o read_check_2_4 read_check_2_4.c helpers.c -lgmp
 
-read_max: read_max helpers.c helpers.h
+read_max: read_max.c helpers.c helpers.h
 	gcc -g -o read_max read_max.c helpers.c -lgmp
 
 clean:
