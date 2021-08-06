@@ -36,12 +36,12 @@ int main(int argc, char **argv) {
         struct dirent *dirent;
 	char write_2[100];
 	char write_4[100];
-        for (int i = 0; (dirent = readdir(rd)) != NULL; i++) {
+	for (int i = 0; (dirent = readdir(rd)) != NULL; i++) {
             if (strcmp(dirent->d_name, ".") != 0 &&
                 strcmp(dirent->d_name, "..") != 0) {
-                char *to_read;
+                char to_read[100];
                 strcpy(to_read, filename);
-                to_read = strcat(to_read, dirent->d_name);
+                strcat(to_read, dirent->d_name);
                 //printf("Reading from %s\n", to_read);
 		//char write_2[100];
                 // don't include .txt

@@ -36,9 +36,9 @@ int main(int argc, char **argv) {
         for (int i = 0; (dirent = readdir(rd)) != NULL; i++) {
 	if (strcmp(dirent->d_name, ".") != 0 &&
             strcmp(dirent->d_name, "..") != 0) {
-		char *to_read;
+		char to_read[100];
 		strcpy(to_read, filename);
-		to_read = strcat(to_read, dirent->d_name);
+		strcat(to_read, dirent->d_name);
 		//printf("Reading from %s\n", to_read);
                 readFrom(to_read, primes, b);
             }
@@ -75,8 +75,10 @@ void readFrom(char* filename, mpz_t* primes, mpz_t b) {
             mpz_set(max, m);
         }
     }
-    gmp_printf("Maximum pair: %Zd\n in file %s\n", max, filename);
-    
+    if (mpz_sizeinbase(max, 2) > 150) {
+    	gmp_printf("Maximum pair: %Zd\n in file %s\n", max, filename);
+    }
+
     mpz_clear(m);
     mpz_clear(max);
 
