@@ -12,7 +12,7 @@
 // smoothness bound
 #define BOUND 32768
 
-void readFrom(char* filename, mpz_t* primes, mpz_t b);
+void readFrom(char* filename, mpz_t* primes, mpz_t b, mpz_t* max_ret);
 
 int main(int argc, char **argv) {
     char filename[100];
@@ -29,6 +29,11 @@ int main(int argc, char **argv) {
         printf("Error retrieving file stats");
     }
 
+    mpz_t max;
+    mpz_t max_current;
+    mpz_init(max);
+    mpz_init(max_current);
+
     if (S_ISDIR(root_stat.st_mode)) {
         DIR *rd;
         rd = opendir(filename);
@@ -40,13 +45,19 @@ int main(int argc, char **argv) {
 		strcpy(to_read, filename);
 		strcat(to_read, dirent->d_name);
 		//printf("Reading from %s\n", to_read);
-                readFrom(to_read, primes, b);
+                readFrom(to_read, primes, b, &max_current);
+		if (mpz_cmp(max, max_current) < 0) {
+                    mpz_set(max, max_current);
+		}
+		printf("%d\n", i);
             }
         }
+	gmp_printf("Overall max: %Zd\n", max);
     } else {  // we assume it is a file
-        readFrom(filename, primes, b);
+        readFrom(filename, primes, b, &max);
     }
-
+    mpz_clear(max);
+    mpz_clear(max_current);
     mpz_clear(b);
     for (int i = 0; i < NUM_PRIMES; i++) {
             mpz_clear(primes[i]);
@@ -55,7 +66,7 @@ int main(int argc, char **argv) {
 }
 
 
-void readFrom(char* filename, mpz_t* primes, mpz_t b) {
+void readFrom(char* filename, mpz_t* primes, mpz_t b, mpz_t* max_ret) {
     FILE *read_from;
 
     read_from = fopen(filename, "r");   
@@ -75,9 +86,10 @@ void readFrom(char* filename, mpz_t* primes, mpz_t b) {
             mpz_set(max, m);
         }
     }
-    if (mpz_sizeinbase(max, 2) > 150) {
+    if (mpz_sizeinbase(max, 2) > 180) {
     	gmp_printf("Maximum pair: %Zd\n in file %s\n", max, filename);
     }
+    mpz_set(*max_ret, max);
 
     mpz_clear(m);
     mpz_clear(max);
