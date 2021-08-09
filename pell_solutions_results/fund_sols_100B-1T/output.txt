@@ -1,0 +1,4 @@
+Equations solved (thread 0): 487560476
+Sieving Time (thread 0): 696.801349 seconds
+Solving Time (thread 0): 354.393421 seconds
+Total Time taken 62125.562886 seconds
