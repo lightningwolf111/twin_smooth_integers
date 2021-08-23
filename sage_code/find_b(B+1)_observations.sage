@@ -24,15 +24,6 @@ def square_free(i):
     string = str(ret).replace(",", "")
     return string[1:len(string) - 1]
 
-def check_mult(line):
-    if (line[0:2] == "1 "):
-        return -1
-    try:
-        b = line.index("*")
-        return b
-    except ValueError:
-        return -1
-
 def find_beta(b, B, file, func):
     fraction = (b*(B+1)/((b+1)*B))
     if (fraction.numerator() + 1) == fraction.denominator():
