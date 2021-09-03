@@ -48,3 +48,13 @@ extern void value_of_fourth_poly(mpz_t m, mpz_t result);
 // (min + i).
 extern void smooths_in_range(mpz_t primes[], long min, long max,
 		int num_primes, char* res);
+
+// returns 0 if the pell equation with coefficient d gives no b-smooth pairs,
+// and otherwise returns m where (m, m+1) are b-smooth.
+// requires: d is not a square.
+// result is return parameter. Must be initialized.
+extern void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes);
+
+// Returns true if and only if x * x - d * y * y == 1.
+extern bool check_pell(mpz_t x, mpz_t y, mpz_t d);
+

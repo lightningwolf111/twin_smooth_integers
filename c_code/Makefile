@@ -1,4 +1,4 @@
-PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel
+PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel connected_component_search
 
 all :$(PROGS)
 
@@ -19,6 +19,9 @@ read_check_2_4: read_check_2_4.c helpers.c helpers.h
 
 read_max: read_max.c helpers.c helpers.h
 	gcc -g -o read_max read_max.c helpers.c -lgmp
+
+connected_component_search: connected_component_search.c helpers.c helpers.h 
+	gcc -g -o connected_component_search connected_component_search.c helpers.c -lgmp
 
 clean:
 	rm -f *.o $(PROGS) fourth_pell_solution
