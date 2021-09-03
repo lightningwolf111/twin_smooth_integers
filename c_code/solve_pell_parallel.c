@@ -41,7 +41,7 @@ void clear_constants();
 // and otherwise returns m where (m, m+1) are b-smooth.
 // requires: d is not a square.
 // result is return parameter. Must be initialized.
-void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, int thread);
+void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, int thread);
 
 // Returns true if and only if x * x - d * y * y == 1.
 bool check_pell(mpz_t x, mpz_t y, mpz_t d);
@@ -75,7 +75,6 @@ int main(int argc, char **argv) {
         cuts[i] = start + i*sub_interval;
     }
 
-    init_constants();
     mpz_t primes[NUM_PRIMES];
     mpz_t b;
     mpz_init_set_si(b, BOUND);
@@ -121,7 +120,6 @@ int main(int argc, char **argv) {
 
     printf("Total Time taken %lf seconds\n", omp_get_wtime() - wall_start_time);    
     
-    clear_constants();
     for (int i = 0; i < NUM_PRIMES; i++) {
         mpz_clear(primes[i]);
     }
@@ -147,7 +145,7 @@ void sieve_interval_pell(long start, long end, FILE *fp, mpz_t b, mpz_t primes[]
             mpz_init(d);
             mpz_set_ui(d, i);
             if (mpz_perfect_square_p(d) == 0) { // not perfect square TODO Maybe replace with removing "4" from 2QPrime
-                solve_pell(d, b, result, primes, NUM_PRIMES, thread);
+                solve_pell_parr(d, b, result, primes, NUM_PRIMES, thread);
                 //gmp_printf("%Zd\n", result);
                 if (mpz_cmp_si(result,0) != 0) {
                     mpz_out_str(fp, 10, result);
@@ -185,13 +183,22 @@ void two_Qprime_in_range(long min, long max, char* res, mpz_t primes[], int num_
 }
 
 
-void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, int thread) {
+void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, int thread) {
     // Uses the method of continued fractions, and the recurence relations on
     // page 382 of Rosen's book Elementary Number Theory to generate the convergents.
     // Cuts off when the numerator gets too high to save time.
    
     double solve_start_time = omp_get_wtime();
  
+    mpz_t one;
+    mpz_t zero;
+    mpz_t cutoff;
+    
+    mpz_init_set_str(one, "1", 10);
+    mpz_init_set_str(zero, "0", 10);
+    mpz_init_set_str(cutoff, "1", 10);
+    mpz_mul_2exp(cutoff, cutoff, BIT_CUTOFF);
+
     // lists:
     mpz_t numerators[MAX_PERIOD];
     mpz_t denominators[MAX_PERIOD];
@@ -232,6 +239,9 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, 
             }
             mpz_clear(psquared);
             mpz_clear(p_plus_root_d);
+	    mpz_clear(one);
+            mpz_clear(zero);
+            mpz_clear(cutoff);
             return; // this pell equation does not give useful smooths
         }
         mpz_init(p_k[index-1]);
@@ -280,7 +290,9 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, 
         }
         mpz_clear(psquared);
         mpz_clear(p_plus_root_d);
-
+        mpz_clear(one);
+        mpz_clear(zero);
+        mpz_clear(cutoff);
         return;
     }
     mpz_set(result, zero);
@@ -297,39 +309,9 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, 
     }
     mpz_clear(psquared);
     mpz_clear(p_plus_root_d);
-
-    return; // y was not smooth
-}
-
-bool check_pell(mpz_t x, mpz_t y, mpz_t d) {
-    mpz_t xsquared;
-    mpz_init(xsquared);
-    mpz_mul(xsquared, x, x);
-    mpz_t dysquared;
-    mpz_init(dysquared);
-    mpz_mul(dysquared, y, y);
-    mpz_mul(dysquared, dysquared, d);
-    mpz_sub(xsquared, xsquared, dysquared);
-    if (mpz_cmp_ui(xsquared, 1) == 0) {
-        mpz_clear(xsquared);
-        mpz_clear(dysquared);
-        return true;
-    }
-    mpz_clear(xsquared);
-    mpz_clear(dysquared);
-    return false;
-}
-
-void init_constants() {
-    // mpz constants:
-    mpz_init_set_str(one, "1", 10);
-    mpz_init_set_str(zero, "0", 10);
-    mpz_init_set_str(cutoff, "1", 10);
-    mpz_mul_2exp(cutoff, cutoff, BIT_CUTOFF);
-}
-
-void clear_constants() {
     mpz_clear(one);
     mpz_clear(zero);
     mpz_clear(cutoff);
+    return; // y was not smooth
 }
+

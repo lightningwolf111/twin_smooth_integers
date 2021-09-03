@@ -362,7 +362,7 @@ def randomExperimental(b, num_coeff_facts, quantity, skew, max_b):
     return sols
 
 def solvePellFully(coeff):
-    extra_primes = primesUpToB(32000)
+    extra_primes = primesUpToB(2**15)
     M = findM(extra_primes)
     fundSol = fundamentalPellSolConvergentsExperimental(2*coeff)
     if (not (fundSol == -1 or fundSol[1] == 0)):
@@ -373,7 +373,7 @@ def solvePellFully(coeff):
             # sols.append((smoothNum, coeff, 1))
             print("Fundamental Solution gives " + str(smoothNum))
             for index in range(2, M+1):
-                # print(index) 
+                print(index) 
                 newSol = nextPellSol(newSol[0], newSol[1], fundSol[0], fundSol[1], 2*coeff)
                 if inQ(extra_primes, Integer(newSol[1])):
                     smoothNum = (newSol[0] - 1) / 2
@@ -440,12 +440,12 @@ def fundamentalPellSolConvergentsExperimental_2(d):
         index = index + 1
         numerators.append(cont_frac[index - 2] * numerators[index - 1] + numerators[index - 2])
         denominators.append(cont_frac[index - 2] * denominators[index - 1] + denominators[index - 2])
-        print("Numerator at " + str(index) + " is " + str(numerators[index]))
-        print("Denominator at " + str(index) + " is " + str(denominators[index]))
+#        print("Numerator at " + str(index) + " is " + str(numerators[index]))
+#        print("Denominator at " + str(index) + " is " + str(denominators[index]))
         if (numerators[index] > 2**500):
             return -1
     # print(time.time() - st)
-    print(index)
+#    print(index)
     return (numerators[index], denominators[index])
 
 def pellWhichConvergent(d):
@@ -605,4 +605,136 @@ def pell_bad_n_tuples(n, b):
             for pair in combinations(factor_set, n):
                 res[pair] += 1
     return res
+
+###########################################################################
+
+# Investigating certain particular classes of pell equations.
+
+def get_factors(current, p_facts):
+    if (len(p_facts) == 0):
+        return [current]
+    res = []
+    prime_tup = p_facts[0]
+    for i in range(prime_tup[1] + 1):
+        newList = list(p_facts)
+        newList.pop(0)
+        res += get_factors(current * prime_tup[0] ** i, newList)
+    return res
+
+
+def generate_factors(Q):
+    fact = factor(4*Q)
+    return get_factors(1, list(fact))
+
+
+
+# Solve Pell equations of Richaud-Degert type for positive R:
+def solve_pell_RD_type_pos(minQ, maxQ):
+    maxSol = 0
+    minSol = 2**1000000
+    primes = primesUpToB(2**15)
+    smooths = []
+    for Q in range(minQ, maxQ):
+        for R in generate_factors(Q):
+            D = Q**2 + R
+#            D = squarefree_part(D)
+            if (D % 2 == 1):
+                D = D * 4
+            if (D > 1 and D % 2 == 0):
+                sol = fundamentalPellSolConvergentsExperimental_2(D)
+                if (sol == -1):
+                    print("NOT FOUND")
+                    continue;
+                if (sol[0] > maxSol):
+                    maxSol = sol[0]
+                print("Q: " + str(Q) + " R: " + str(R) + " D: " +  str(D) + "   Solution: " + str(sol))
+                if inQ(primes, Integer(sol[1])):
+                    smoothNum = (sol[0] - 1) / 2
+                    smooths.append(smoothNum)
+    print("Maximum solution: " + str(maxSol))
+    return smooths
+
+
+
+# Solve Pell equations of Richaud-Degert type for negative R:
+def solve_pell_RD_type_neg(minQ, maxQ):
+    maxSol = 0
+    minSol = 2**1000000
+    smooths = []
+    primes = primesUpToB(2**15)
+    for Q in range(minQ, maxQ):
+        for R in generate_factors(Q):
+            D = Q**2 - R
+            D = squarefree_part(D)
+            if (D % 2 == 1):
+                D = D * 4
+            if (D > 1 and D % 2 == 0):
+                sol = fundamentalPellSolConvergentsExperimental_2(D)
+                if (sol == -1):
+                    print("NOT FOUND")
+                    continue;
+                if (sol[0] > maxSol):
+                    maxSol = sol[0]
+                print("Q: " + str(Q) + " R: " + str(R) + " Solution: " + str(sol))
+                if inQ(primes, Integer(sol[1])):
+                    smoothNum = (sol[0] - 1) / 2
+                    smooths.append(smoothNum)
+    print("Maximum solution: " + str(maxSol))
+    return smooths
+
+
+# Experimental, solves the above for only R = 1.
+def solve_pell_RD_type_pos_1(minQ, maxQ):
+    maxSol = 0
+    minSol = 2**1000000
+    primes = primesUpToB(2**15)
+    smooths = []
+    for Q in range(minQ, maxQ):
+        for R in [1]:
+            D = Q**2 + R
+#            D = squarefree_part(D)
+            if (D % 2 == 1):
+                D = D * 4
+            if (D > 1 and D % 2 == 0):
+                sol = fundamentalPellSolConvergentsExperimental_2(D)
+                if (sol == -1):
+                    print("NOT FOUND")
+                    continue;
+                if (sol[0] > maxSol):
+                    maxSol = sol[0]
+                print("Q: " + str(Q) + " R: " + str(R) + " D: " +  str(D) + "   Solution: " + str(sol))
+                if inQ(primes, Integer(sol[1])):
+                    smoothNum = (sol[0] - 1) / 2
+                    smooths.append(smoothNum)
+    print("Maximum solution: " + str(maxSol))
+    return smooths
+
+
+def generate_factors_without_times_4(Q):
+    fact = factor(Q)
+    return get_factors(1, list(fact))
+
+# An algorithm based on D = Q^2 + R type pell equations that sieves for Q and looks for suitable R.
+def Q_and_R_algorithm(minQ, maxQ, b):
+    smooths = []
+    primes = primesUpToB(b)
+    for Q in range(minQ, maxQ):
+        if (not inQ(primes, Q)):
+            continue;
+        R_values = generate_factors_without_times_4(Q)
+        R_values.sort()
+        for R in R_values:
+            if (inQ(primes, Q**2 + R)):
+                smooths.append(Q**2/R)
+                continue;
+    return smooths
+
+# Returns any smooth numbers in the given range.
+def find_smooth_in_range(min, max, b):
+    smooths = []
+    primes = primesUpToB(b)
+    for i in range(min, max):
+        if (inQ(primes, i)):
+            smooths.append(i)
+    return smooths
 
