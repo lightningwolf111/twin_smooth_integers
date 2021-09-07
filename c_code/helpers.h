@@ -58,3 +58,7 @@ extern void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_p
 // Returns true if and only if x * x - d * y * y == 1.
 extern bool check_pell(mpz_t x, mpz_t y, mpz_t d);
 
+// Returns through the output parameter result the squarefree part of the argument.
+// Requires the argument to be smooth (within the given set of primes) and result
+// to be initialized.
+extern void square_free_part(mpz_t arg, mpz_t result, mpz_t primes[], int num_primes);

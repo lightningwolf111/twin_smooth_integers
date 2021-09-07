@@ -362,3 +362,19 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
     mpz_clear(cutoff);
     return; // y was not smooth
 }
+
+
+void square_free_part(mpz_t arg, mpz_t result, mpz_t primes[], int num_primes) {
+    mpz_t prime_squared;
+    mpz_init(prime_squared);
+    mpz_set_ui(result, 1);
+    for (int i = 0; i < num_primes; i++) {
+        if (mpz_divisible_p(arg, primes[i]) != 0) {
+            mpz_mul(prime_squared, primes[i], primes[i]);
+            if (mpz_divisible_p(arg, prime_squared) == 0) {
+                mpz_mul(result, result, primes[i]);
+	    }
+        }
+    }
+
+}
