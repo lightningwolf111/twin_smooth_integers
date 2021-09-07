@@ -1,4 +1,4 @@
-PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel connected_component_search 
+PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel connected_component_search conrey_near_pell
 
 all :$(PROGS)
 
@@ -23,8 +23,8 @@ read_max: read_max.c helpers.c helpers.h
 connected_component_search: connected_component_search.c helpers.c helpers.h solve_pell_extended.cc solve_pell_extended.h 
 	g++ -g -o connected_component_search connected_component_search.c helpers.c solve_pell_extended.cc -lgmp -lgmpxx
 
-#solve_pell_extended: solve_pell_extended.cc solve_pell_extended.h helpers.c helpers.h
-#	g++ -g -o solve_pell_extended solve_pell_extended.cc helpers.c -lgmp
+conrey_near_pell: conrey_near_pell.cc helpers.c helpers.h solve_pell_extended.cc solve_pell_extended.h
+	g++ -g -o conrey_near_pell conrey_near_pell.cc solve_pell_extended.cc helpers.c -lgmp -lgmpxx
 
 clean:
 	rm -f *.o $(PROGS) fourth_pell_solution

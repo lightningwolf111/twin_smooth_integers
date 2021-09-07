@@ -62,3 +62,15 @@ extern bool check_pell(mpz_t x, mpz_t y, mpz_t d);
 // Requires the argument to be smooth (within the given set of primes) and result
 // to be initialized.
 extern void square_free_part(mpz_t arg, mpz_t result, mpz_t primes[], int num_primes);
+
+// Returns through the output parameter the D from our set that gives this pair.
+// Requires the argument to be smooth (within the given set of primes) and result
+// to be initialized.
+extern void extract_D(mpz_t arg, mpz_t result, mpz_t primes[], int num_primes);
+
+
+// The file parameter should point to a file with smooth numbers m from pairs (m, m+1)
+// of smooth numbers. It creates a new file with the "_with_coeffs" appended to the 
+// same name, where each line contains the coefficient of the Pell equation that gives
+// this pair, followed by a space, and m.
+extern void generate_file_with_coefficients(char* file_name);
