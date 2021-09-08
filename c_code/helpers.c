@@ -2,6 +2,7 @@
 #include <gmp.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 // number of primes below 32768
 #define NUM_PRIMES 3512 
@@ -361,4 +362,84 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
     mpz_clear(zero);
     mpz_clear(cutoff);
     return; // y was not smooth
+}
+
+
+void square_free_part(mpz_t arg, mpz_t result, mpz_t primes[], int num_primes) {
+    mpz_t prime_squared;
+    mpz_init(prime_squared);
+    mpz_set_ui(result, 1);
+    mpz_t check;
+    mpz_init(check);
+    mpz_set(check, arg);
+    for (int i = 0; i < num_primes; i++) {
+        bool odd = false;
+        while (mpz_divisible_p(check, primes[i]) != 0) {
+            odd = !odd;
+            mpz_divexact(check, check, primes[i]);
+        }
+	if (odd) {
+            mpz_mul(result, result, primes[i]);
+        }
+    }
+
+}
+
+void extract_D(mpz_t arg, mpz_t result, mpz_t primes[], int num_primes) {
+    square_free_part(arg, result, primes, num_primes);
+    mpz_t res_m_plus_one;
+    mpz_init(res_m_plus_one);
+    mpz_t m_plus_one;
+    mpz_init(m_plus_one);
+    mpz_add_ui(m_plus_one, arg, 1);
+    square_free_part(arg, result, primes, num_primes);
+    square_free_part(m_plus_one, res_m_plus_one, primes, num_primes);
+    mpz_mul(result, result, res_m_plus_one);
+    if (mpz_divisible_ui_p(arg, 4) != 0) {
+        mpz_mul_ui(result, result, 4);
+    }
+}
+
+
+void generate_file_with_coefficients(char* file_name) {
+    FILE* read_from = fopen(file_name, "r");
+    char write_to_string[100];
+    strncpy(write_to_string, file_name, strlen(file_name) - 4);
+    strcat(write_to_string, "_with_coeffs.txt");
+    FILE* write_to = fopen(write_to_string, "w");
+
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    mpz_t m;
+    mpz_init(m);
+    mpz_t d;
+    mpz_init(d);
+
+    mpz_t primes[NUM_PRIMES];
+    mpz_t b;
+    mpz_init_set_si(b, BOUND);
+    primes_up_to_b(primes, b);
+
+    while ((read = getline(&line, &len, read_from)) != -1) {
+        //printf("Retrieved line of length %zu:\n", read);
+        //printf("%s", line);
+        mpz_set_str(m, line, 10);
+        //gmp_printf("m: %Zd\n", m);
+	extract_D(m, d, primes, NUM_PRIMES);
+        mpz_out_str(write_to, 10, d);
+	fputs(" ", write_to);
+	mpz_out_str(write_to, 10, m);
+        fputs("\n", write_to);
+    }
+
+
+    mpz_clear(m);
+    mpz_clear(d);
+
+    fclose(read_from);
+    fclose(write_to);
+    
+
 }

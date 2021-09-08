@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "helpers.h"
+#include "solve_pell_extended.h"
 
 
 // number of primes below 32768
@@ -11,10 +12,6 @@
 // smoothness bound
 #define BOUND 32768
 
-// The number of Pell equations solved.
-long counter;
-// Solving time (for solving pell equations)
-clock_t solving_time;
 
 /*
  * Recursively checks all coefficients that can be reached my successively multiplying
@@ -32,7 +29,6 @@ int main(int argc, char **argv) {
     clock_t start_time = clock(), diff_time;
 
     FILE *fp;
-    counter = 0;
 
     fp = fopen("/tmp/res.txt", "w");
     if (fp == NULL) {
@@ -50,15 +46,8 @@ int main(int argc, char **argv) {
 
     check_from(current_coefficient, primes, fp, b);
 
-    printf("Equations solved: %ld\n", counter);
-
-
     fclose(fp);
 
-    diff_time = clock() - start_time;
-
-    int msec = diff_time * 1000 / CLOCKS_PER_SEC;
-    printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
 
     for (int i = 0; i < NUM_PRIMES; i++) {
         mpz_clear(primes[i]);
@@ -84,8 +73,8 @@ void check_from(mpz_t current, mpz_t primes[], FILE *fp, mpz_t b) {
         mpz_mul(newCoeff, current, primes[i]);
 	//gmp_printf("Testing new: %Zd\n", newCoeff);
 	if (mpz_perfect_square_p(newCoeff) == 0) {
-	    solve_pell(newCoeff, b, result, primes, NUM_PRIMES);
-	    // gmp_printf("%Zd\n", result);
+	    solve_pell_extended(newCoeff, b, result, primes, NUM_PRIMES);
+	    //gmp_printf("%Zd\n", result);
             if (mpz_cmp_si(result,0) != 0) {
                 mpz_out_str(fp, 10, result);
                 fputs("\n", fp);
