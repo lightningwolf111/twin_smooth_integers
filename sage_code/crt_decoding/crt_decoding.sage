@@ -75,8 +75,9 @@ def crt_decode(B, p_list, r_list, d):
 
   # step 1c: View v as the coefficients of a d−1 degree polynomial w(xB).
   # Output w(x) as the required polynomial
+  #v = v[::-1]
   w(x) = 0
-  w_coeffs = [val * (B**i) for i, val in enumerate(v)]
+  w_coeffs = [val / (B**i) for i, val in enumerate(v)]
   for i, val in enumerate(w_coeffs):
     w += val * (x**(i))
 
