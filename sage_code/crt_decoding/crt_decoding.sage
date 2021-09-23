@@ -42,7 +42,7 @@ def crt_decode(B, p_list, r_list, d):
     P *= p
 
   # this will NOT work for general CRT decoding. It's a shortcut since we know all r_i = -U
-  R = P - r_list[0]
+  R = P + r_list[0]
 
   a = round(a_opt(d, B, P))
   a_prime = d - a
@@ -67,16 +67,20 @@ def crt_decode(B, p_list, r_list, d):
 
   # step 1b: Run the LLL algorithm on the d-dimensional lattice spanned by the
   # rows of the matrix L. Let v be the resulting short vector in L.
+
+  print("B=%s\nR=%s\nP=%s" %(B, R, P))
+  #print(matrix(L_arr))
   L = IntegerLattice(L_arr, lll_reduce=True)
   v = L.shortest_vector()
 
   # step 1c: View v as the coefficients of a d−1 degree polynomial w(xB).
   # Output w(x) as the required polynomial
   w(x) = 0
-  w_coeffs = [val / (B**i) for i, val in enumerate(v)]
+  w_coeffs = [val * (B**i) for i, val in enumerate(v)]
   for i, val in enumerate(w_coeffs):
-    w += val * (x**i)
+    w += val * (x**(i))
 
+  #print(w)
   # step 2: find all integer roots of w(x)
   # rts = [k[0] for k in w.roots() if k[0] in ZZ]
   rts = w.roots()
@@ -89,7 +93,7 @@ def crt_strongly_smooth(s, T, d, abs_I):
   integers in the interval [2T - abs_I, 2T]
   '''
 
-  pr = primesUpToB(s)
+  pr = primesUpToB(s+1)
   S = 1
   P = 1
 
