@@ -35,6 +35,9 @@ def I_bound(T, S, d):
   expon = ( (log(T, 2) / log(S, 2)) - (2.5/d) )
   return (T ** expon)/4
 
+def amp(m, P, R):
+  return gcd(P, m-R)
+
 def crt_decode(B, p_list, r_list, d):
   # required constants:
   P = 1
@@ -83,10 +86,16 @@ def crt_decode(B, p_list, r_list, d):
 
   #print(w)
   # step 2: find all integer roots of w(x)
-  # rts = [k[0] for k in w.roots() if k[0] in ZZ]
-  rts = w.roots()
+  amp_bound = P ** (sqrt( ( log (4 * B, 2)/ log(P, 2)) ) + (5 / (4*d)))
 
-  return rts
+  rts = [k[0] for k in w.roots() if (k[0] in ZZ and amp(k[0], P, R) > amp_bound)]
+
+  solns = [r - r_list[0] for r in rts]
+
+  print("Found solutions:")
+  print(solns)
+
+  return solns
 
 def crt_strongly_smooth(s, T, d, abs_I):
   '''
