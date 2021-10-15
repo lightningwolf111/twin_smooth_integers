@@ -13,9 +13,9 @@
 // number of threads
 #define NUM_THREADS 4
 
-// Sieving time (searching for coefficients)
+// Sieving time 
 double sieving_time[NUM_THREADS];
-// Solving time (for solving pell equations)
+// Time to check the 4th, 6th or 7th solution
 double checking_time[NUM_THREADS];
 
 int main(int argc, char **argv) {
@@ -115,10 +115,11 @@ int main(int argc, char **argv) {
 
 	printf("Total Time taken %lf seconds\n", omp_get_wtime() - wall_start_time); 
 
-	mpz_clear(b);
 	for (int i = 0; i < NUM_PRIMES; i++) {
 		mpz_clear(primes[i]);
 	}
+	mpz_clear(b);
+	
 	return EXIT_SUCCESS;
 }
 
