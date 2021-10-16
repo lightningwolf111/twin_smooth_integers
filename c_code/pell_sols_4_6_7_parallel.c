@@ -20,14 +20,13 @@ double checking_time[NUM_THREADS];
 
 int main(int argc, char **argv) {
 	int which;
-	long long start, end;
-	long step;
+	long start, end, step;
 	gmp_printf("Which successive solution to check (one of {4, 6, 7}): \n");
 	gmp_scanf("%d", &which);
 	gmp_printf("Start: \n");
-	gmp_scanf("%lld", &start);
+	gmp_scanf("%ld", &start);
 	gmp_printf("End: \n");
-	gmp_scanf("%lld", &end);
+	gmp_scanf("%ld", &end);
 	gmp_printf("Step: \n");
     gmp_scanf("%ld", &step);
 	
@@ -35,8 +34,8 @@ int main(int argc, char **argv) {
 	
 	FILE *fp[NUM_THREADS];
 
-	long long cuts[NUM_THREADS + 1];
-    long long sub_interval = (end - start + (NUM_THREADS-1))/NUM_THREADS;
+	long cuts[NUM_THREADS + 1];
+    long sub_interval = (end - start + (NUM_THREADS-1))/NUM_THREADS;
     cuts[0] = start;
     cuts[NUM_THREADS] = end;
     for (int i = 1; i < NUM_THREADS; i++)
@@ -58,7 +57,7 @@ int main(int argc, char **argv) {
         checking_time[thread] = 0;
 
         char file_path[200];
-        sprintf(file_path, "results/res_pell_sols_%d_thr_%d_%lld-%lld.txt", which, thread, cuts[thread], cuts[thread+1]);
+        sprintf(file_path, "results/res_pell_sols_%d_thr_%d_%ld-%ld.txt", which, thread, cuts[thread], cuts[thread+1]);
 
         fp[thread] = fopen(file_path, "w");
         if (fp[thread] == NULL) {
@@ -66,7 +65,7 @@ int main(int argc, char **argv) {
             //return EXIT_FAILURE;
         }
 
-		long long curr_start = cuts[thread];
+		long curr_start = cuts[thread];
 		while (curr_start < cuts[thread+1]) {
 			char res[step+1]; // cover last pair to overlap
 			for (long i = 0; i < step + 1; i++) {
@@ -74,7 +73,8 @@ int main(int argc, char **argv) {
 			}
 			double sieve_start_time = omp_get_wtime();
 			smooths_in_range(primes, curr_start, curr_start + step + 1, NUM_PRIMES, res);
-			sieving_time[thread] += omp_get_wtime() - sieve_start_time;
+			double sieve_time = omp_get_wtime() - sieve_start_time;
+			sieving_time[thread] += sieve_time;
 
 			double check_start_time = omp_get_wtime();
 			for (long i = 0; i < step; i++) {
@@ -94,21 +94,22 @@ int main(int argc, char **argv) {
 					if (found) {
 										//printf("SMOOTH: %ld \n ", i + curr_start);
 						char str[257];
-						sprintf(str, "%lld\n", i+curr_start);
+						sprintf(str, "%ld\n", i+curr_start);
 						// str[257] = '\n';
 									fputs(str, fp[thread]);
 					}
 					mpz_clear(m);
 				}
 			}
-			checking_time[thread] += omp_get_wtime() - check_start_time;
+			double check_time =  omp_get_wtime() - check_start_time;
+			checking_time[thread] += check_time;
 			
 			curr_start += step;
-			printf("[%d] Checked up to %lld.\n", thread, curr_start);
+			printf("[%d] -> %ld, sieving: %lfs, checking: %lfs\n", thread, curr_start, sieve_time, check_time);
 		}
 		
-		printf("Sieving Time (thread %d): %lf seconds\n", thread, sieving_time[thread]);
-        printf("Checking Time (thread %d): %lf seconds\n", thread, checking_time[thread]);
+		printf("Total sieving Time (thread %d): %lf seconds\n", thread, sieving_time[thread]);
+        printf("Total checking Time (thread %d): %lf seconds\n", thread, checking_time[thread]);
 
 		fclose(fp[thread]);
 	}
