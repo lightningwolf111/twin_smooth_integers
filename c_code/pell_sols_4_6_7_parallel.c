@@ -18,6 +18,8 @@ double sieving_time[NUM_THREADS];
 // Time to check the 4th, 6th or 7th solution
 double checking_time[NUM_THREADS];
 
+long counter[NUM_THREADS];
+
 int main(int argc, char **argv) {
 	int which;
 	long start, end, step;
@@ -53,6 +55,7 @@ int main(int argc, char **argv) {
 	#pragma omp parallel num_threads(NUM_THREADS)
     {
         int thread = omp_get_thread_num();
+		counter[thread] = 0;
         sieving_time[thread] = 0;
         checking_time[thread] = 0;
 
@@ -71,10 +74,10 @@ int main(int argc, char **argv) {
 			for (long i = 0; i < step + 1; i++) {
 				res[i] = 0;
 			}
+			counter[thread] += 1;
 			double sieve_start_time = omp_get_wtime();
 			smooths_in_range(primes, curr_start, curr_start + step + 1, NUM_PRIMES, res);
-			double sieve_time = omp_get_wtime() - sieve_start_time;
-			sieving_time[thread] += sieve_time;
+			sieving_time[thread] += omp_get_wtime() - sieve_start_time;
 
 			double check_start_time = omp_get_wtime();
 			for (long i = 0; i < step; i++) {
@@ -101,11 +104,14 @@ int main(int argc, char **argv) {
 					mpz_clear(m);
 				}
 			}
-			double check_time =  omp_get_wtime() - check_start_time;
-			checking_time[thread] += check_time;
+			checking_time[thread] += omp_get_wtime() - check_start_time;;
 			
 			curr_start += step;
-			printf("[%d] -> %ld, sieving: %lfs, checking: %lfs\n", thread, curr_start, sieve_time, check_time);
+
+			if(counter[thread] % 100 == 0){
+				printf("[%d] -> %ld, %ld intervals, sieving: %lfs, checking: %lfs\n", 
+					thread, curr_start + step, counter[thread], sieving_time[thread], checking_time[thread]);
+			}
 		}
 		
 		printf("Total sieving Time (thread %d): %lf seconds\n", thread, sieving_time[thread]);
