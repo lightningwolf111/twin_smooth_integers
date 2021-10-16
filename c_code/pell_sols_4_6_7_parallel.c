@@ -20,13 +20,14 @@ double checking_time[NUM_THREADS];
 
 int main(int argc, char **argv) {
 	int which;
-	long start, end, step;
+	long long start, end;
+	long step;
 	gmp_printf("Which successive solution to check (one of {4, 6, 7}): \n");
 	gmp_scanf("%d", &which);
 	gmp_printf("Start: \n");
-	gmp_scanf("%ld", &start);
+	gmp_scanf("%lld", &start);
 	gmp_printf("End: \n");
-	gmp_scanf("%ld", &end);
+	gmp_scanf("%lld", &end);
 	gmp_printf("Step: \n");
     gmp_scanf("%ld", &step);
 	
@@ -34,8 +35,8 @@ int main(int argc, char **argv) {
 	
 	FILE *fp[NUM_THREADS];
 
-	long cuts[NUM_THREADS + 1];
-    long sub_interval = (end - start + (NUM_THREADS-1))/NUM_THREADS;
+	long long cuts[NUM_THREADS + 1];
+    long long sub_interval = (end - start + (NUM_THREADS-1))/NUM_THREADS;
     cuts[0] = start;
     cuts[NUM_THREADS] = end;
     for (int i = 1; i < NUM_THREADS; i++)
@@ -50,15 +51,14 @@ int main(int argc, char **argv) {
 
 	double wall_start_time = omp_get_wtime();
 	
-	
 	#pragma omp parallel num_threads(NUM_THREADS)
     {
         int thread = omp_get_thread_num();
         sieving_time[thread] = 0;
         checking_time[thread] = 0;
 
-        char file_path[100];
-        sprintf(file_path, "results/res_pell_sols_%d_thr_%d_%ld-%ld.txt", which, thread, start, end);
+        char file_path[200];
+        sprintf(file_path, "results/res_pell_sols_%d_thr_%d_%lld-%lld.txt", which, thread, cuts[thread], cuts[thread+1]);
 
         fp[thread] = fopen(file_path, "w");
         if (fp[thread] == NULL) {
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
             //return EXIT_FAILURE;
         }
 
-		long curr_start = cuts[thread];
+		long long curr_start = cuts[thread];
 		while (curr_start < cuts[thread+1]) {
 			char res[step+1]; // cover last pair to overlap
 			for (long i = 0; i < step + 1; i++) {
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 					if (found) {
 										//printf("SMOOTH: %ld \n ", i + curr_start);
 						char str[257];
-						sprintf(str, "%ld\n", i+curr_start);
+						sprintf(str, "%lld\n", i+curr_start);
 						// str[257] = '\n';
 									fputs(str, fp[thread]);
 					}
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 			checking_time[thread] += omp_get_wtime() - check_start_time;
 			
 			curr_start += step;
-			printf("[%d] Checked up to %ld.\n", thread, curr_start);
+			printf("[%d] Checked up to %lld.\n", thread, curr_start);
 		}
 		
 		printf("Sieving Time (thread %d): %lf seconds\n", thread, sieving_time[thread]);
