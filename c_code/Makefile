@@ -1,4 +1,4 @@
-PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel connected_component_search conrey_near_pell
+PROGS = solve_pell factor_method pell_sols_4_6_7 read_check_2_4 read_max solve_pell_parallel connected_component_search conrey_near_pell pell_sols_4_6_7_parallel
 
 all :$(PROGS)
 
@@ -13,6 +13,9 @@ factor_method: factor_method.c helpers.c helpers.h
 
 pell_sols_4_6_7: pell_sols_4_6_7.c helpers.c helpers.h
 	gcc -g -o pell_sols_4_6_7 pell_sols_4_6_7.c helpers.c -lgmp
+
+pell_sols_4_6_7_parallel: pell_sols_4_6_7_parallel.c helpers.c helpers.h
+	gcc -g -fopenmp -o pell_sols_4_6_7_parallel pell_sols_4_6_7_parallel.c helpers.c -lgmp
 
 read_check_2_4: read_check_2_4.c helpers.c helpers.h
 	gcc -g -o read_check_2_4 read_check_2_4.c helpers.c -lgmp

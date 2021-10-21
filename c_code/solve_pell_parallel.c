@@ -16,7 +16,7 @@
 // smoothness bound
 #define BOUND 32768
 // number of threads
-#define NUM_THREADS 64
+#define NUM_THREADS 4
 
 // The number of Pell equations solved.
 long counter[NUM_THREADS];

@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 		for (long i = 0; i < step + 1; i++) {
 			res[i] = 0;
 		}
-
+		
 		smooths_in_range(primes, curr_start, curr_start + step + 1, NUM_PRIMES, res);
 		for (long i = 0; i < step; i++) {
 			if ((res[i] == 1) && (res[i+1] == 1)) {
