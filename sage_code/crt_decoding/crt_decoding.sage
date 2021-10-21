@@ -73,8 +73,10 @@ def crt_decode(B, p_list, r_list, d):
 
   print("B=%s\nR=%s\nP=%s" %(B, R, P))
   #print(matrix(L_arr))
+  print("Looking for shortest vector...")
   L = IntegerLattice(L_arr, lll_reduce=True)
   v = L.shortest_vector()
+  print("found shortest vector.")
 
   # step 1c: View v as the coefficients of a d−1 degree polynomial w(xB).
   # Output w(x) as the required polynomial
@@ -127,3 +129,18 @@ def crt_strongly_smooth(s, T, d, abs_I):
 
     # instance of crt problem is now given by abs_I, q_list, and u_list
     return crt_decode(abs_I, q_list, u_list, d)
+
+def isStronglySmooth(num, primes):
+  for prime in primes:
+    while (num % prime == 0):
+      num = num/prime
+  return num==1
+
+
+def brute_strongly_smooths(s, T, abs_I):
+  primes = primesUpToB(s+1)
+  res = []
+  for i in range(2*T-abs_I, 2*T):
+    if (isStronglySmooth(i, primes)):
+        res.append(i)
+  return res
