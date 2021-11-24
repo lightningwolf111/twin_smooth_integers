@@ -234,26 +234,6 @@ def solvePellEquationsFaster(QPrime, M, b):
 
 
 def fundamentalPellSolConvergentsExperimental(d):
-    st = time.time()
-    global pell_solutions
-    global pell_dictionary
-    if pell_solutions == []:
-        # load("Write_Pell_Solutions_File.sage")
-        # print("loading sols")
-        pell_solutions = read_Pell_fund_from_file()
-    if d % 2 == 0 and d < len(pell_solutions*2):
-        # print("Optimized!")
-        return pell_solutions[d/2]
-    
-    if pell_dictionary == {}:
-        print("loading dictionary")
-        # load("Write_Pell_Solutions_File.sage")
-        pell_dictionary = read_Pell_dictionary_from_file()
-    if d in pell_dictionary.keys():
-        # print("dictionary used!")
-        return pell_dictionary[d]
-    
-    #print("Not found")
     cont_frac = continued_fraction(sqrt(d))
     frac = (cont_frac[0] + 1 / cont_frac[1])
     index = 2
@@ -440,9 +420,9 @@ def fundamentalPellSolConvergentsExperimental_2(d):
         index = index + 1
         numerators.append(cont_frac[index - 2] * numerators[index - 1] + numerators[index - 2])
         denominators.append(cont_frac[index - 2] * denominators[index - 1] + denominators[index - 2])
-        print("Numerator at " + str(index) + " is " + str(numerators[index]))
-        print("Denominator at " + str(index) + " is " + str(denominators[index]))
-        print("Convergent: " + str(cont_frac[index - 2]))
+#        print("Numerator at " + str(index) + " is " + str(numerators[index]))
+#        print("Denominator at " + str(index) + " is " + str(denominators[index]))
+#        print("Convergent: " + str(cont_frac[index - 2]))
         if (numerators[index] > 2**500):
             return -1
     # print(time.time() - st)
@@ -739,3 +719,24 @@ def find_smooth_in_range(min, max, b):
             smooths.append(i)
     return smooths
 
+
+def fundamentalPellSolConvergentsExperimentalPrinting(d):
+    st = time.time()
+    cont_frac = continued_fraction(sqrt(d))
+    frac = (cont_frac[0] + 1 / cont_frac[1])
+    index = 2
+    while not (frac.numerator()**2 - frac.denominator()**2 * d == 1):
+        #print(str(frac.numerator()**2 - frac.denominator()**2 * d == 1))
+        currIndex = index
+        currF = cont_frac[index]
+        while currIndex > 0:
+            currIndex = currIndex - 1
+            currF = cont_frac[currIndex] + 1 / currF
+        print("Fraction: " + str(currF))
+        print("Coefficient: " + str(cont_frac[index]))
+        frac = currF
+        index = index + 1
+        if (frac.numerator() > 2**260):
+            return -1
+    # print(time.time() - st)
+    return (frac.numerator(), frac.denominator())
