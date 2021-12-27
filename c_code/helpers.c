@@ -196,26 +196,22 @@ void smooths_in_range(mpz_t primes[], long min, long max, int num_primes, char* 
 	for (long i = 0; i < max - min; i++) {
 		nums[i] = min + i;
 	}
-    mpz_t divide_by;
-    mpz_init(divide_by);
 	for (int i = 0; i < num_primes; i++) {
-		mpz_set(divide_by, primes[i]);
-		while (mpz_cmp_ui(divide_by, max) < 0) {
-			long div_by = mpz_get_ui(divide_by);
-            long mult = min/div_by + (min % div_by != 0);
+		long div_by = mpz_get_ui(primes[i]);
+		while (div_by < max) {
+			long mult = min/div_by + (min % div_by != 0);
 			while (mult * div_by < max) {
 				nums[mult * div_by - min] /= mpz_get_ui(primes[i]);
 				mult += 1;
 			}
-		    mpz_mul(divide_by, primes[i], divide_by);
+		div_by *= mpz_get_ui(primes[i]);
 		}
 	}
-    mpz_clear(divide_by);
 	for (long i = 0; i < max - min; i++) {
 		if (nums[i] == 1) {
 			res[i] = 1;
 		}
-	}  
+	}
 }
 
 bool check_pell(mpz_t x, mpz_t y, mpz_t d) {
@@ -290,6 +286,7 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
                 mpz_clear(numerators[i]);
                 mpz_clear(denominators[i]);
             }
+	    solving_time += clock() - start_time;
             mpz_clear(psquared);
             mpz_clear(p_plus_root_d);
 	    mpz_clear(one);
