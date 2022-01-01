@@ -17,6 +17,9 @@
 // The number of Pell equations solved.
 long counter;
 
+// The number of solutions in the desired range, regardless of whether y was smooth or not
+long numInRange;
+
 // Sieving time (searching for coefficients)
 clock_t sieving_time;
 
@@ -324,6 +327,16 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
 
         index++;
     }
+
+    ////////////////////
+    mpz_t minBound;
+    mpz_init_set_str(minBound, "1", 10);
+    mpz_mul_2exp(minBound, minBound, BIT_CUTOFF - 18); // Set 2^240 bits as the min
+    if (mpz_cmp(numerators[index], minBound) > 0) {
+        numInRange++;
+    }
+    ////////////////////
+
     if (is_smooth(denominators[index], primes, num_primes)) {
         mpz_sub(result, numerators[index], one);
         mpz_divexact_ui(result, result, 2);
