@@ -151,6 +151,9 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
             fclose(fp);
             exit(0);
 	}
+	if (counter * 100 % numPellToSolve == 0) {
+	    printf("Finished solving: %ld\n", counter);
+	}
     }
 
     // Recursively check other vectors
