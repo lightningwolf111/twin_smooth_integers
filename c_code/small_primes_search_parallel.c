@@ -109,13 +109,13 @@ int main(int argc, char **argv) {
 
 //    printf("Results in range: %ld\n", numInRange);
 
-    /*diff_time = clock() - start_time;
+    diff_time = clock() - start_time;
     int msec = diff_time * 1000 / CLOCKS_PER_SEC;
     printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
 
-    int msec_solve = solving_time * 1000 / CLOCKS_PER_SEC;
-    printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);
-    */
+    // int msec_solve = solving_time * 1000 / CLOCKS_PER_SEC;
+    // printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);
+    
 
     for (int i = 0; i < NUM_PRIMES; i++) {
         mpz_clear(primes[i]);
@@ -158,18 +158,18 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], mpz_t b, m
 	}
 	#pragma omp parallel num_threads(NUM_THREADS)
 	#pragma omp for
-        for (int nextPos = startPos;nextPos < NUM_PRIMES; nextPos++) {
+        for (int nextPos = startPos; nextPos < NUM_PRIMES; nextPos++) {
             int thread = omp_get_thread_num();
-	    //printf("Thread %d\n", thread);
-	    coeff_vector[fixed] = nextPos;
-	    if (pasteRes) {
-		if (mpz_cmp_si(result,0) != 0) {
-         	   mpz_out_str(files[thread], 10, result);
-            	   fputs("\n", files[thread]);
-            	   //gmp_printf("Result %Zd coeff: %Zd \n", result, current);
-       		}
-		pasteRes = false;
-	    }
+	        //printf("Thread %d\n", thread);
+            coeff_vector[fixed] = nextPos;
+            if (pasteRes) {
+                if (mpz_cmp_si(result,0) != 0) {
+                mpz_out_str(files[thread], 10, result);
+                    fputs("\n", files[thread]);
+                    //gmp_printf("Result %Zd coeff: %Zd \n", result, current);
+                }
+            pasteRes = false;
+            }
             search_sequential(numFacts, minS, maxS, coeff_vector, files[thread], b, primes, fixed + 1);
         }
     }
@@ -180,8 +180,9 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], mpz_t b, m
 
 
 void search_sequential(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, mpz_t b, mpz_t primes[], int fixed) {
-    //printf("Checking fixed: %d vector 0 : %d vector 1 %d \n", fixed, coeff_vector[0], coeff_vector[1]);
     int thread = omp_get_thread_num();
+    // printf("[%d] Checking fixed: %d vector 0 : %d vector 1 %d \n", thread, fixed, coeff_vector[0], coeff_vector[1]);
+    
     if (counter[thread] >= numPellToSolve) {
 	return;
     } 
@@ -201,7 +202,9 @@ void search_sequential(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[],
     if (fixed == numFacts && mpz_cmp(current, minS) > 0) {
         mpz_t result;
         mpz_init(result);
+        double start_time_solve = clock();
         solve_pell(current, b, result, primes, NUM_PRIMES);
+        solving_time[thread] += clock() - start_time_solve;
         counter[thread]++;
         if (mpz_cmp_si(result,0) != 0) {
             mpz_out_str(fp, 10, result);
@@ -213,13 +216,14 @@ void search_sequential(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[],
             printf("Equations solved by thread %d : %ld\n", thread, counter[thread]);
 
             printf("Results in range: %ld\n", numInRange[thread]);
-/*
+
             diff_time = clock() - start_time;
             int msec = diff_time * 1000 / CLOCKS_PER_SEC;
-            printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
+            printf("[%d] Total Time taken %d seconds %d milliseconds\n", thread, msec/1000, msec%1000);
 
             int msec_solve = solving_time[thread] * 1000 / CLOCKS_PER_SEC;
-            printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);*/
+            printf("[%d] Solving Time taken %d seconds %d milliseconds\n", thread, msec_solve/1000, msec_solve%1000);
+            
             return;
         }
         if (counter[thread] * 100 % numPellToSolve == 0) {

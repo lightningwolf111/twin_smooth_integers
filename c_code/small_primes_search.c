@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
 }
 
 void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, mpz_t b, mpz_t primes[], int fixed) {
-    //printf("Checking fixed: %d vector 0 : %d vector 1 %d \n", fixed, coeff_vector[0], coeff_vector[1]);
+    // printf("Checking fixed: %d vector 0 : %d vector 1 %d \n", fixed, coeff_vector[0], coeff_vector[1]);
 	
     // Check that we are not too large
     mpz_t current;
@@ -130,30 +130,30 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
         mpz_t result;
         mpz_init(result);
         solve_pell(current, b, result, primes, NUM_PRIMES);
-	counter++;
+	    counter++;
         if (mpz_cmp_si(result,0) != 0) {
             mpz_out_str(fp, 10, result);
             fputs("\n", fp);
 	    //gmp_printf("Result %Zd coeff: %Zd \n", result, current);
         }
-	mpz_clear(result);
-	if (counter == numPellToSolve) {
-            printf("Equations solved: %ld\n", counter);
+        mpz_clear(result);
+        if (counter == numPellToSolve) {
+                printf("Equations solved: %ld\n", counter);
 
-            printf("Results in range: %ld\n", numInRange);
+                printf("Results in range: %ld\n", numInRange);
 
-	    diff_time = clock() - start_time;
-    	    int msec = diff_time * 1000 / CLOCKS_PER_SEC;
-            printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
+            diff_time = clock() - start_time;
+                int msec = diff_time * 1000 / CLOCKS_PER_SEC;
+                printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
 
-	    int msec_solve = solving_time * 1000 / CLOCKS_PER_SEC;
-    	    printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);
-            fclose(fp);
-            exit(0);
-	}
-	if (counter * 100 % numPellToSolve == 0) {
-	    printf("Finished solving: %ld\n", counter);
-	}
+            int msec_solve = solving_time * 1000 / CLOCKS_PER_SEC;
+                printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);
+                fclose(fp);
+                exit(0);
+        }
+        if (counter * 100 % numPellToSolve == 0) {
+            printf("Finished solving: %ld\n", counter);
+        }
     }
 
     // Recursively check other vectors
@@ -161,7 +161,7 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
         int nextPos = 0;
         if (fixed != 0) {
             nextPos = coeff_vector[fixed - 1] + 1;
-	}
+	    }
         for (;nextPos < NUM_PRIMES; nextPos++) {
             coeff_vector[fixed] = nextPos;
             search(numFacts, minS, maxS, coeff_vector, fp, b, primes, fixed + 1);
