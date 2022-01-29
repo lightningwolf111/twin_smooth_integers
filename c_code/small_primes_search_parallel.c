@@ -202,9 +202,9 @@ void search_sequential(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[],
     if (fixed == numFacts && mpz_cmp(current, minS) > 0) {
         mpz_t result;
         mpz_init(result);
-        double start_time_solve = clock();
+        //double start_time_solve = clock();
         solve_pell(current, b, result, primes, NUM_PRIMES);
-        solving_time[thread] += clock() - start_time_solve;
+        //solving_time[thread] += clock() - start_time_solve;
         counter[thread]++;
         if (mpz_cmp_si(result,0) != 0) {
             mpz_out_str(fp, 10, result);
@@ -213,7 +213,7 @@ void search_sequential(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[],
         }
         mpz_clear(result);
         if (counter[thread] == numPellToSolve) {
-            printf("Equations solved by thread %d : %ld\n", thread, counter[thread]);
+            /*printf("Equations solved by thread %d : %ld\n", thread, counter[thread]);
 
             printf("Results in range: %ld\n", numInRange[thread]);
 
@@ -223,7 +223,7 @@ void search_sequential(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[],
 
             int msec_solve = solving_time[thread] * 1000 / CLOCKS_PER_SEC;
             printf("[%d] Solving Time taken %d seconds %d milliseconds\n", thread, msec_solve/1000, msec_solve%1000);
-            
+            */
             return;
         }
         if (counter[thread] * 100 % numPellToSolve == 0) {
