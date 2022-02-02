@@ -75,10 +75,10 @@ int main(int argc, char **argv) {
         coeff_vector[i] = i;
     }
     mpz_t minS;
-    mpz_init_set_si(minS, 1);
+    mpz_init(minS);
     mpz_ui_pow_ui(minS, 2, minSize);
     mpz_t maxS;
-    mpz_init_set_si(maxS, 1);
+    mpz_init(maxS);
     mpz_ui_pow_ui(maxS, 2, minSize + 15);
 
     
@@ -105,6 +105,8 @@ int main(int argc, char **argv) {
         mpz_clear(primes[i]);
     }
     mpz_clear(b);
+    mpz_clear(minS);
+    mpz_clear(maxS);
 
     return EXIT_SUCCESS;
 
@@ -122,6 +124,7 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
     //gmp_printf("Current %Zd \n", current);
 
     if (mpz_cmp(current, maxS) > 0) {
+        mpz_clear(current);
         return; // Coefficient too large
     }
 
@@ -138,23 +141,24 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
         }
         mpz_clear(result);
         if (counter == numPellToSolve) {
-                printf("Equations solved: %ld\n", counter);
+            printf("Equations solved: %ld\n", counter);
 
-                printf("Results in range: %ld\n", numInRange);
+            printf("Results in range: %ld\n", numInRange);
 
             diff_time = clock() - start_time;
-                int msec = diff_time * 1000 / CLOCKS_PER_SEC;
-                printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
+            int msec = diff_time * 1000 / CLOCKS_PER_SEC;
+            printf("Total Time taken %d seconds %d milliseconds\n", msec/1000, msec%1000);
 
             int msec_solve = solving_time * 1000 / CLOCKS_PER_SEC;
-                printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);
-                fclose(fp);
-                exit(0);
+            printf("Solving Time taken %d seconds %d milliseconds\n", msec_solve/1000, msec_solve%1000);
+            fclose(fp);
+            exit(0);
         }
         if (counter * 100 % numPellToSolve == 0) {
             printf("Finished solving: %ld\n", counter);
         }
     }
+    mpz_clear(current);
 
     // Recursively check other vectors
     if (fixed < numFacts) {
@@ -167,5 +171,4 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
             search(numFacts, minS, maxS, coeff_vector, fp, b, primes, fixed + 1);
         }
     }
-    mpz_clear(current);
 }
