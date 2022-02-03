@@ -128,7 +128,6 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
     if (fixed == numFacts && mpz_cmp(current, minS) > 0) {
         mpz_t result;
         mpz_init(result);
-        printf("Solving: cv[0] = %d\n", coeff_vector[0]);
         solve_pell(current, b, result, primes, NUM_PRIMES);
 	    counter++;
         if (mpz_cmp_si(result,0) != 0) {
