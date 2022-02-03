@@ -237,7 +237,7 @@ bool check_pell(mpz_t x, mpz_t y, mpz_t d) {
 }
 
 void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) {
-    // Uses the method of continued fractions, and the recurence relations on
+    // Uses the method of continued fractions, and the recurrence relations on
     // page 382 of Rosen's book Elementary Number Theory to generate the convergents.
     // Cuts off when the numerator gets too high to save time.
 

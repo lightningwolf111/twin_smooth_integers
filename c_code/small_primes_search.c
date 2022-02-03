@@ -25,9 +25,6 @@ long numInRange;
 // Max number to solve
 long numPellToSolve;
 
-// Sieving time (searching for coefficients)
-clock_t sieving_time;
-
 // Solving time (for solving pell equations)
 clock_t solving_time;
 
@@ -46,18 +43,17 @@ int main(int argc, char **argv) {
     gmp_scanf("%d", &minSize);
     printf("Number of distinct primes in coefficient: \n");
     gmp_scanf("%d", &numFacts);
-
     printf("Cutoff for number of Pell equations to solve: \n");
     gmp_scanf("%dil", &numPellToSolve);
 
     start_time = clock();
-    sieving_time = solving_time = 0;
+    solving_time = 0;
 
     FILE *fp;
     counter = 0;
     numInRange = 0;
 
-    fp = fopen("/tmp/res.txt", "w");
+    fp = fopen("res_small/res.txt", "w");
     if (fp == NULL) {
         perror("Couldn't open file.");
         return EXIT_FAILURE;
@@ -132,6 +128,7 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, int coeff_vector[], FILE *fp, 
     if (fixed == numFacts && mpz_cmp(current, minS) > 0) {
         mpz_t result;
         mpz_init(result);
+        printf("Solving: cv[0] = %d\n", coeff_vector[0]);
         solve_pell(current, b, result, primes, NUM_PRIMES);
 	    counter++;
         if (mpz_cmp_si(result,0) != 0) {
