@@ -49,7 +49,6 @@ int main(int argc, char **argv) {
     int minSize, numFacts;
     long counter_all = 0;
     long numInRange_all = 0;
-    clock_t sieving_time_all = 0;
     clock_t solving_time_all = 0;
 
     printf("Minimum Coefficient size: \n");
@@ -109,9 +108,9 @@ int main(int argc, char **argv) {
     int msec = diff_time * 1000 / CLOCKS_PER_SEC;
     printf("Total wall time: %d seconds %d milliseconds\n", msec/1000, msec%1000);
 
-    int msec_solve = solving_time_all * 1000 / CLOCKS_PER_SEC;
+    long msec_solve = solving_time_all * 1000 / CLOCKS_PER_SEC;
     printf("Total solving time: %d s %d ms\n", msec_solve/1000, msec_solve%1000);
-    int msec_solve_per_thread = msec_solve / NUM_THREADS;
+    long msec_solve_per_thread = msec_solve / NUM_THREADS;
     printf("Total solving time per thread: %d s %d ms\n", msec_solve_per_thread/1000, msec_solve_per_thread%1000);
     
     for (int i = 0; i < NUM_PRIMES; i++) {
