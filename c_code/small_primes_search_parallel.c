@@ -105,13 +105,13 @@ int main(int argc, char **argv) {
     printf("Total number of results in range: %ld\n", numInRange_all);
 
     diff_time = clock() - start_time;
-    int msec = diff_time * 1000 / CLOCKS_PER_SEC;
-    printf("Total wall time: %d seconds %d milliseconds\n", msec/1000, msec%1000);
+    long msec = diff_time * 1000 / CLOCKS_PER_SEC;
+    printf("Total wall time: %ld seconds %ld milliseconds\n", msec/1000, msec%1000);
 
     long msec_solve = solving_time_all * 1000 / CLOCKS_PER_SEC;
-    printf("Total solving time: %d s %d ms\n", msec_solve/1000, msec_solve%1000);
+    printf("Total solving time: %ld s %ld ms\n", msec_solve/1000, msec_solve%1000);
     long msec_solve_per_thread = msec_solve / NUM_THREADS;
-    printf("Total solving time per thread: %d s %d ms\n", msec_solve_per_thread/1000, msec_solve_per_thread%1000);
+    printf("Total solving time per thread: %ld s %ld ms\n", msec_solve_per_thread/1000, msec_solve_per_thread%1000);
     
     for (int i = 0; i < NUM_PRIMES; i++) {
         mpz_clear(primes[i]);
