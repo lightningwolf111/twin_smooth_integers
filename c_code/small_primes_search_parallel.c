@@ -156,7 +156,7 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
     //int thread = omp_get_thread_num();
     //printf("[%d] Checking fixed: %d vector 0 : %d vector 1 %d \n", thread, fixed, coeff_vector[0], coeff_vector[1]);
     //printf("[%d] fixed = %d, cv[0] = %d, cv[1] = %d \n", thread, fixed, coeff_vector[0], coeff_vector[1]);
-    int count = 0;
+    long count = 0;
     for (int i = 0; i < NUM_THREADS; i++)
         count += counter[i];
     if (count >= numPellToSolve) {
