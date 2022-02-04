@@ -56,7 +56,8 @@ int main(int argc, char **argv) {
     printf("Number of distinct primes in coefficient: \n");
     gmp_scanf("%d", &numFacts);
     printf("Cutoff for number of Pell equations to solved: \n");
-    gmp_scanf("%dil", &numPellToSolve);
+    gmp_scanf("%ld", &numPellToSolve);
+
 
     start_time = clock();
     for (int i = 0; i < NUM_THREADS; i++) {
