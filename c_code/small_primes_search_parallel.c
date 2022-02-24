@@ -178,6 +178,7 @@ void search_n_sequential(int numFacts, mpz_t minS, mpz_t maxS, mpz_t b, mpz_t pr
             mpz_clear(current);
             return; // Coefficient too large
         }
+	mpz_clear(current);
         // Recursively check other vectors
         int nextPos = 0;
         if (fixed != 0) {
@@ -274,7 +275,7 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
 
             // int msec_solve = solving_time[thread] * 1000 / CLOCKS_PER_SEC;
             // printf("[%d] Solving Time taken %d seconds %d milliseconds\n", thread, msec_solve/1000, msec_solve%1000);
-            
+            mpz_clear(current);
             return;
         }
     }

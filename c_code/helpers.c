@@ -335,6 +335,7 @@ void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) 
     if (mpz_cmp(numerators[index], minBound) > 0) {
         numInRange++;
     }
+    mpz_clear(minBound);
     ////////////////////
 
     if (is_smooth(denominators[index], primes, num_primes)) {
