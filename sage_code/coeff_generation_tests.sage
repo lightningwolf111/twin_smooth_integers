@@ -1,6 +1,8 @@
 import numpy as np
 import time
 
+# The start time
+st = 0
 
 # Generates a 'random' coefficient between min and min*b.
 def generate_random(min, primes):
@@ -16,31 +18,12 @@ def generate_random(min, primes):
         num *= p
     return num
 
-#### 2nd Version below is better for the next method.
-
 # Generates a random squarefree smooth between min and min * b, according to the given distribution.
- #def generate_random_skewed(min, primes, distribution):
-     #ints = [i for i in range(len(primes))]
-     #distribution = list(distribution) # Make a local copy for modification
-     #num = 2
-     #while (num < min):
-         #index = np.random.choice(ints, None, True, distribution)
-         #p = primes[index]
-         #if num % p != 0:
-             #num *= p
-         #for i in range(len(ints)):
-             #if (ints[i] == index):
-                 #del ints[i]
-                 #del distribution[i]
-                 #distribution = rescale(distribution)
-                 #break
-     #return num
- #
 def generate_random_skewed(min, primes, distribution):
     ints = [i for i in range(len(primes))]
     distribution = list(distribution) # Make a local copy for modification
     num = 2
-    primesChosen = np.random.choice(ints, 50, True, distribution)
+    primesChosen = np.random.choice(ints, 50, False, distribution)
     index = 0
     while (num < min):
         p = primes[primesChosen[index]]
@@ -48,25 +31,28 @@ def generate_random_skewed(min, primes, distribution):
              num *= p
         index += 1
         if index == 50:
-            primesChosen = np.random.choice(ints, 50, True, distribution)
+            primesChosen = np.random.choice(ints, 50, False, distribution)
             index = 0
     return num
 
 # Like the above, but instead begins with the number being 'base'.
 def generate_random_with_base(base, min, primes, distribution):
+    global st
+    method_st = time.time()
     ints = [i for i in range(len(primes))]
     distribution = list(distribution) # Make a local copy for modification
     num = base
-    primesChosen = np.random.choice(ints, 50, True, distribution)
+    primesChosen = np.random.choice(ints, 20, False, distribution)
     index = 0
     while (num < min):
         p = primes[primesChosen[index]]
         if num % p != 0:
              num *= p
         index += 1
-        if index == 50:
-            primesChosen = np.random.choice(ints, 50, True, distribution)
+        if index == 20:
+            primesChosen = np.random.choice(ints, 20, False, distribution)
             index = 0
+    st += time.time() - method_st
     return num
 
 def generate_skewed_distribution(primes, skew):
@@ -136,6 +122,7 @@ def compare_distributions_base(min, dist1, dist2, trials, primes, base):
 
 # As the above, but just with one distribution
 def eval_distribution(min, dist1, trials, primes, base):
+    global st
     sols = []
     for i in range(trials):
         num = generate_random_with_base(base, min, primes, dist1)
@@ -147,6 +134,30 @@ def eval_distribution(min, dist1, trials, primes, base):
     print("Number of results for distribution with repeats: " + str(len(sols)))
     sols = set(sols)
     print("Number of results for distribution: " + str(len(sols)))
+    print("Time: " + str(st))
+    st = 0
+    return sols
+
+# Disallow repeatted coefficients.
+def eval_distribution_no_repeats(min, dist1, trials, primes, base):
+    coeffs = set()
+    global st
+    sols = []
+    for i in range(trials):
+        num = generate_random_with_base(base, min, primes, dist1)
+        while num in coeffs:
+            num = generate_random_with_base(base, min, primes, dist1)
+        res = fundamentalPellSolConvergentsExperimental_2(2*num)
+        if (res != -1):
+            sols.append(res)
+        if (i % 100 == 0):
+            print("Finished " + str(i))
+        coeffs.add(num)
+    print("Number of results for distribution with repeats: " + str(len(sols)))
+    sols = set(sols)
+    print("Number of results for distribution: " + str(len(sols)))
+    print("Time: " + str(st))
+    st = 0
     return sols
 
 
@@ -165,6 +176,57 @@ def rescale(dist):
     for i in range(len(dist)):
         dist[i] = (dist[i]/sum).numerical_approx()
     return dist
+
+###############################################################################################################
+# Comparison with conrey
+
+
+# num_generators is the number of working coefficients to generate the new conrey set from.
+# gen_min is the minimum size of a generator (should be >= sqrt(min))
+def eval_conrey(min, trials, primes, dist, num_generators, gen_min):
+    base = 2
+    coeffs = set()
+    global st
+    sols = []
+    coeffs_half_bits_plus = [] # The conrey coefficients from which to generate the new ones
+    while len(coeffs_half_bits_plus) < num_generators:
+        num = generate_random_with_base(base, gen_min, primes, dist)
+        while num in coeffs_half_bits_plus:
+            num = generate_random_with_base(base, gen_min, primes, dist)
+        res = fundamentalPellSolConvergentsExperimental_2(2*num)
+        if (res != -1 and inQ(primes, res[1])):
+            coeffs_half_bits_plus.append(num)
+#            print("Building from " + str(num))
+    print("Finished generating half size coefficients")
+    for i in range(trials):
+        num = 0
+        while num < min:
+            first = randrange(num_generators)
+            second = randrange(num_generators)
+            num = coeffs_half_bits_plus[first] * coeffs_half_bits_plus[second]
+            num = squarefree_part(num)
+#        print("Example: " + str(num))
+        res = fundamentalPellSolConvergentsExperimental_2(2*num)
+        if (res != -1): 
+            sols.append(res)
+
+
+    print("Number of results for distribution with repeats: " + str(len(sols)))
+    sols = set(sols)
+    print("Number of results for distribution: " + str(len(sols)))
+    print("Time: " + str(st))
+    st = 0
+    return sols
+
+
+
+
+
+
+
+
+
+
 
 
 
