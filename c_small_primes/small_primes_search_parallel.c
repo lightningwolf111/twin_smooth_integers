@@ -263,7 +263,7 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
             mpz_out_str(fp, 10, result);
             fputs("\n", fp);
             //gmp_printf("Result %Zd coeff: %Zd \n", result, current);
-            check_higher_solutions(result, primes, num_primes, fp);
+            check_higher_solutions(result, primes, NUM_PRIMES, fp);
         }
         mpz_clear(result);
         if (counter[thread] * 100 % numPellToSolve == 0) {
