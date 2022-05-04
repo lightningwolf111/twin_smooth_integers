@@ -536,7 +536,7 @@ void check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
             mpz_sub_ui(w8, x2, 1);      // w8 = x^2 - 1
             mpz_mul(w8, w8, x2);        // w8 = x^2*(x^2 - 1)
             mpz_mul_ui(w8, w8, 8);      // w8 = 8*x^2*(x^2 - 1)
-            mpz_sub_ui(w8, w8, 1);      // w8 = 8*x^2*(x^2 - 1) + 1
+            mpz_add_ui(w8, w8, 1);      // w8 = 8*x^2*(x^2 - 1) + 1
             if (is_smooth(w8, primes, num_primes)) {
                 mpz_t m8;
                 mpz_init(m8);
@@ -685,13 +685,13 @@ void check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
             mpz_init(w10);
 
             // Check 10th solution.
-            // corresponds to a smooth pair if w10 = 16*x^4 - 20x^2 + 1 
-            // = 4*x^2*(4*x^2 -5) + 1 is smooth.
+            // corresponds to a smooth pair if w10 = 16*x^4 - 20x^2 + 5 
+            // = 4*x^2*(4*x^2 -5) + 5 is smooth.
             mpz_mul_ui(w10, x2, 4);     // w10 = 4*x^2
             mpz_sub_ui(w10, w10, 5);    // w10 = 4*x^2 - 5
             mpz_mul(w10, w10, x2);      // w10 = x^2*(4*x^2 - 5)
             mpz_mul_ui(w10, w10, 4);    // w10 = 4*x^2*(4*x^2 - 5)
-            mpz_add_ui(w10, w10, 1);    // w10 = 4*x^2*(4*x^2 - 5) + 1
+            mpz_add_ui(w10, w10, 5);    // w10 = 4*x^2*(4*x^2 - 5) + 5
             if (is_smooth(w10, primes, num_primes)) {
                 mpz_t m10;
                 mpz_init(m10);
