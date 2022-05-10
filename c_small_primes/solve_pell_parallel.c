@@ -6,42 +6,11 @@
 #include <stdlib.h>
 #include "helpers.h"
 
-// The maximum period of continued fractions that we allow. 1000 should be very safe.
-#define MAX_PERIOD 1000
-// The cutoff for continued fractions. Will only find pairs up to this cutoff-1 bits from
-// fundamental solutions.
-#define BIT_CUTOFF (258)
-// number of primes below 32768
-#define NUM_PRIMES 3512
-// smoothness bound
-#define BOUND 32768
-// number of threads
-#define NUM_THREADS 4
-
-// The number of Pell equations solved.
-long counter[NUM_THREADS];
-
-// Sieving time (searching for coefficients)
-double sieving_time[NUM_THREADS];
-// Solving time (for solving pell equations)
-double solving_time[NUM_THREADS];
-
-// Some mpz_t constants
-mpz_t one;
-mpz_t zero;
-mpz_t cutoff;
-
-// Initializes mpz_t constants
-void init_constants();
-
-// Clears mpz_t constants
-void clear_constants();
-
 // returns 0 if the pell equation with coefficient d gives no b-smooth pairs,
 // and otherwise returns m where (m, m+1) are b-smooth.
 // requires: d is not a square.
 // result is return parameter. Must be initialized.
-void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, int thread);
+void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes);
 
 // Returns true if and only if x * x - d * y * y == 1.
 bool check_pell(mpz_t x, mpz_t y, mpz_t d);
@@ -49,14 +18,20 @@ bool check_pell(mpz_t x, mpz_t y, mpz_t d);
 // Solves pell equations in 2 * Qprime and puts m into the file for any
 // smooth pairs (m, m+1) resulting from fundamental solutions to those pell
 // equations.
-void sieve_interval_pell(long start, long end, FILE *fp, mpz_t b, mpz_t primes[], int thread);
+void sieve_interval_pell(long start, long end, FILE *fp, mpz_t b, mpz_t primes[], int thread, clock_t* sieving_time, clock_t* solving_time, long* counter);
 
 // Returns a char array through the output parameter res, where are return value of 1 in
 // res means that min+index is in two*QPrime (see Lehmer's definition).
-void two_Qprime_in_range(long min, long max, char *res, mpz_t primes[], int num_primes, int thread);
+void two_Qprime_in_range(long min, long max, char *res, mpz_t primes[], int num_primes);
 
 int main(int argc, char **argv)
 {
+    // The number of Pell equations solved.
+    long counter[NUM_THREADS];
+    // Sieving time (searching for coefficients)
+    clock_t sieving_time[NUM_THREADS];
+    // Solving time (for solving pell equations)
+    clock_t solving_time[NUM_THREADS];
     long start, end, step;
     printf("Starting coefficient: \n");
     gmp_scanf("%ld", &start);
@@ -91,7 +66,7 @@ int main(int argc, char **argv)
         solving_time[thread] = 0;
 
         char file_path[100];
-        sprintf(file_path, "results/res_%d_%ld-%ld.txt", thread, start, end);
+        sprintf(file_path, "results/res_solve_pell_%d_%ld-%ld.txt", thread, cuts[thread], cuts[thread+1]);
 
         fp[thread] = fopen(file_path, "w");
         if (fp[thread] == NULL)
@@ -105,7 +80,7 @@ int main(int argc, char **argv)
         while (curr_start < cuts[thread + 1])
         {
             // printf(curr_start);
-            sieve_interval_pell(curr_start, curr_start + step, fp[thread], b, primes, thread);
+            sieve_interval_pell(curr_start, curr_start + step, fp[thread], b, primes, thread, &sieving_time[thread], &solving_time[thread], &counter[thread]);
             curr_start += step;
             num_steps++;
             if (num_steps % 1000 == 0)
@@ -118,8 +93,8 @@ int main(int argc, char **argv)
 
         fclose(fp[thread]);
 
-        printf("Sieving Time (thread %d): %lf seconds\n", thread, sieving_time[thread]);
-        printf("Solving Time (thread %d): %lf seconds\n", thread, solving_time[thread]);
+        printf("Sieving Time (thread %d): %ld seconds\n", thread, sieving_time[thread]);
+        printf("Solving Time (thread %d): %ld seconds\n", thread, solving_time[thread]);
     }
 
     printf("Total Time taken %lf seconds\n", omp_get_wtime() - wall_start_time);
@@ -133,34 +108,40 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-void sieve_interval_pell(long start, long end, FILE *fp, mpz_t b, mpz_t primes[], int thread)
+void sieve_interval_pell(long start, long end, FILE *fp, mpz_t b, mpz_t primes[], int thread, clock_t *sieving_time, clock_t *solving_time, long *counter)
 {
+    clock_t sieve_start_time = 0;
+    clock_t solve_start_time = 0;
     char res[end - start + 1]; // cover last pair to overlap
     for (long i = 0; i < end - start + 1; i++)
     {
         res[i] = 0;
     }
-    two_Qprime_in_range(start, end, res, primes, NUM_PRIMES, thread);
+    sieve_start_time = omp_get_wtime();
+    two_Qprime_in_range(start, end, res, primes, NUM_PRIMES);
+    *sieving_time += omp_get_wtime() - sieve_start_time;
     for (long i = start; i < end; i++)
     {
         if (res[i - start] == 1)
         {
-            counter[thread]++;
-            // printf("In 2QPRIME: %ld\n", (i));
+            (*counter)++;
+            //printf("In 2QPRIME: %ld\n", (i));
             mpz_t result;
             mpz_init(result);
             mpz_t d;
             mpz_init(d);
             mpz_set_ui(d, i);
-            if (mpz_perfect_square_p(d) == 0)
+            if (mpz_cmp_ui(d, 4) != 0)
             { // not perfect square TODO Maybe replace with removing "4" from 2QPrime
-                solve_pell_parr(d, b, result, primes, NUM_PRIMES, thread);
+                solve_start_time = omp_get_wtime();
+                solve_pell_parr(d, b, result, primes, NUM_PRIMES);
+                *solving_time += omp_get_wtime() - solve_start_time;
                 // gmp_printf("%Zd\n", result);
                 if (mpz_cmp_si(result, 0) != 0)
                 {
                     mpz_out_str(fp, 10, result);
                     fputs(" 1\n", fp);
-                    check_higher_solutions(result, primes, NUM_PRIMES, fp);
+                    check_and_compute_higher_solutions(result, primes, NUM_PRIMES, fp);
                 }
             }
             mpz_clear(result);
@@ -169,9 +150,8 @@ void sieve_interval_pell(long start, long end, FILE *fp, mpz_t b, mpz_t primes[]
     }
 }
 
-void two_Qprime_in_range(long min, long max, char *res, mpz_t primes[], int num_primes, int thread)
+void two_Qprime_in_range(long min, long max, char *res, mpz_t primes[], int num_primes)
 { // including min, excluding max
-    double sieve_start_time = omp_get_wtime();
     long nums[max - min];
     for (long i = 0; i < max - min; i++)
     {
@@ -195,16 +175,13 @@ void two_Qprime_in_range(long min, long max, char *res, mpz_t primes[], int num_
             res[i] = 1;
         }
     }
-    sieving_time[thread] += omp_get_wtime() - sieve_start_time;
 }
 
-void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, int thread)
+void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes)
 {
     // Uses the method of continued fractions, and the recurence relations on
     // page 382 of Rosen's book Elementary Number Theory to generate the convergents.
     // Cuts off when the numerator gets too high to save time.
-
-    double solve_start_time = omp_get_wtime();
 
     mpz_t one;
     mpz_t zero;
@@ -298,7 +275,6 @@ void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_pri
     {
         mpz_sub(result, numerators[index], one);
         mpz_divexact_ui(result, result, 2);
-        solving_time[thread] += omp_get_wtime() - solve_start_time;
 
         for (int i = 0; i < index - 1; i++)
         { // clear ints in p_k, q_k, a_k
@@ -319,7 +295,6 @@ void solve_pell_parr(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_pri
         return;
     }
     mpz_set(result, zero);
-    solving_time[thread] += omp_get_wtime() - solve_start_time;
 
     for (int i = 0; i < index - 1; i++)
     { // clear ints in p_k, q_k, a_k

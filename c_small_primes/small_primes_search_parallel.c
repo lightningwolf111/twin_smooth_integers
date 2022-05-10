@@ -5,20 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "helpers.h"
-
-// The maximum period of continued fractions that we allow. 1000 should be very safe.
-#define MAX_PERIOD 1000
-// The cutoff for continued fractions. Will only find pairs up to this cutoff-1 bits from
-// fundamental solutions.
-#define BIT_CUTOFF (258)
-// number of primes below 32768
-//#define NUM_PRIMES 3512
-#define NUM_PRIMES 172
-// smoothness bound
-//#define BOUND 32768
-#define BOUND 1024
-// number of threads
-#define NUM_THREADS 4
+#include "config.h"
 
 // The point at which to branch into parallelism.
 const int num_until_par;
@@ -87,7 +74,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < NUM_THREADS; i++)
     {
         char file_path[100];
-        sprintf(file_path, "results/res_%d.txt", i);
+        sprintf(file_path, "results/res_small_primes_search_%d.txt", i);
         files[i] = fopen(file_path, "w");
         if (files[i] == NULL)
         {
@@ -292,7 +279,7 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
             mpz_out_str(fp, 10, result);
             fputs("\n", fp);
             // gmp_printf("Result %Zd coeff: %Zd \n", result, current);
-            check_higher_solutions(result, primes, NUM_PRIMES, fp);
+            check_and_compute_higher_solutions(result, primes, NUM_PRIMES, fp);
         }
         mpz_clear(result);
         if (counter[thread] * 100 % numPellToSolve == 0)

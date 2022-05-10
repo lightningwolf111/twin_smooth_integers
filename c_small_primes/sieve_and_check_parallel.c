@@ -85,15 +85,24 @@ int main(int argc, char **argv)
             {
                 if ((res[i] == 1) && (res[i + 1] == 1))
                 {
+                    bool found_higher = false;
                     // printf("smooth pair: %ld \n", i + curr_start);
                     mpz_t m;
                     mpz_init_set_si(m, i + curr_start);
+                    size_t m_bits = mpz_sizeinbase(m, 2);
+                    char m_str[m_bits/3 + 27];
 
+                    
                     // printf("SMOOTH: %ld \n ", i + curr_start);
-                    mpz_out_str(fp[thread], 10, m);
-                    fputs(" 1\n", fp[thread]);
-                    check_higher_solutions(m, primes, NUM_PRIMES, fp[thread]);
-                        
+                    
+                    found_higher = check_higher_solutions(m, primes, NUM_PRIMES, m_str);
+                    if (found_higher) {
+                        mpz_out_str(fp[thread], 10, m);
+                        fputs(m_str, fp[thread]);
+                    } elif (m_bits >= min_bound) {
+                        mpz_out_str(fp[thread], 10, m);
+                    }
+
                     mpz_clear(m);
                 }
             }
