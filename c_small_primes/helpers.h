@@ -76,5 +76,5 @@ void generate_file_with_coefficients(char* file_name);
 // On input m for a smooth pair (m, m+1), check all higher solutions whether they 
 // correspond to a smooth pair for n = 2,3,4,...,12.
 void check_and_compute_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outputfile);
-bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outputfile);
+void check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, bool is_pair[]);
 

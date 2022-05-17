@@ -448,7 +448,7 @@ void check_and_compute_higher_solutions(mpz_t m, mpz_t primes[], int num_primes,
     // to a smooth pair, else is_pair[i] = false.
     is_pair[0] = true;   
     is_pair[1] = true;
-    for (int i=2; i<11; i++) {
+    for (int i=2; i<13; i++) {
         is_pair[i] = false;
     }
     // Initialize space for m2 as it might be used for
@@ -759,17 +759,13 @@ void check_and_compute_higher_solutions(mpz_t m, mpz_t primes[], int num_primes,
     mpz_clear(x2);
 }
 
-bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outputfile) {
-    bool found = false;
-    // Array of booleans for keeping track of whether 
-    // consecutive solutions correspond to smooth pairs.
-    bool is_pair[13];
+void check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, bool is_pair[]) {
     // The first two are not necessary, but included to have:
     // is_pair[i] = true if i-th solutions corresponds
     // to a smooth pair, else is_pair[i] = false.
     is_pair[0] = true;   
     is_pair[1] = true;
-    for (int i=2; i<11; i++) {
+    for (int i=2; i<13; i++) {
         is_pair[i] = false;
     }
     // Initialize space for m2 as it might be used for
@@ -805,11 +801,7 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
     if (is_smooth(x, primes, num_primes)){
         mpz_t w4;
         mpz_init(w4);
-
         is_pair[2] = true;
-        fputs(" 2", outputfile);
-        found = true;
-        
         // Check 4th solution:
         // corresponds to smooth pair if w4 = 2*x^2-1 is smooth.
         mpz_add(w4, x2, x2);
@@ -817,9 +809,7 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
         if (is_smooth(w4, primes, num_primes)){
             mpz_t w8;
             mpz_init(w8);
-
             is_pair[4] = true;
-            fputs(" 4", outputfile);
             // Check 8th solution:
             // corresponds to smooth pair if w8 = 8*x^4-8*x^2+1 = 8*x^2*(x^2-1)+1 is smooth.
             mpz_sub_ui(w8, x2, 1);      // w8 = x^2 - 1
@@ -828,7 +818,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
             mpz_add_ui(w8, w8, 1);      // w8 = 8*x^2*(x^2 - 1) + 1
             if (is_smooth(w8, primes, num_primes)) {
                 is_pair[8] = true;
-                fputs(" 8", outputfile);
             }
             mpz_clear(w8);
         }   
@@ -844,10 +833,7 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
         mpz_t w90, w91;
         mpz_init(w90);
         mpz_init(w91);
-
         is_pair[3] = true;
-        fputs(" 3", outputfile);
-        found = true;
         // Check 9th solution:
         // corresponds to smooth pair if w90 = 8*x^3-6*x-1 = 2*x*(4*x^2-3)-1
         // and w91 = w90 + 2 are smooth.
@@ -859,7 +845,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
         mpz_add_ui(w91, w90, 2);        // w91 = 2*x*(4*x^2 - 3) + 1
         if (is_smooth(w90, primes, num_primes) && is_smooth(w91, primes, num_primes)) {
             is_pair[9] = true;
-            fputs(" 9", outputfile);
         }
         // If also the second solution corresponds to a pair, 
         // check 6th solution.
@@ -873,8 +858,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
             mpz_sub_ui(w6, w6, 3);        // w6 = 4*x^2 - 3
             if (is_smooth(w6, primes, num_primes)) {
                 is_pair[6] = true;
-                fputs(" 6", outputfile);
-
                 // If the 6th and 4th solutions correspond to a smooth pair,
                 // Check 12th solution.
                 if (is_pair[4]) {
@@ -888,7 +871,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
                     mpz_add_ui(w12, w12, 1);    // w12 = 16*x^2*(x^2 - 1) + 1
                     if (is_smooth(w12, primes, num_primes)) {
                         is_pair[12] = true;
-                        fputs(" 12", outputfile);
                     }
                     mpz_clear(w12);
                 }
@@ -910,8 +892,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
     mpz_sub(w50, w51, w50);     // w50 = 4*x^2 - 2*x - 1
     if (is_smooth(w50, primes, num_primes) && is_smooth(w51, primes, num_primes)) {
         is_pair[5] = true;
-        fputs(" 5", outputfile);
-        found = true;
         // If the 5th and 2nd solution correspond to smooth pairs
         // check the 10th solution.
         if (is_pair[2]) {
@@ -928,8 +908,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
             mpz_add_ui(w10, w10, 5);    // w10 = 4*x^2*(4*x^2 - 5) + 5
             if (is_smooth(w10, primes, num_primes)) {
                 is_pair[10] = true;
-                // Compute (m10, m10+1).
-                fputs(" 10", outputfile);
             }
             mpz_clear(w10);
         }
@@ -949,8 +927,6 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
     mpz_sub(w70, w71, w70);     // w70 = 8*x^3 - 4*x^2 - 4*x + 1
     if (is_smooth(w70, primes, num_primes) && is_smooth(w71, primes, num_primes)) {
         is_pair[7];
-        fputs(" 7", outputfile);
-        found = true;
     }
 
     // Check 11th solution:
@@ -971,12 +947,7 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
     mpz_add(w111, w110, w111);      // w111 = 32*x^5 + 16*x^4 - 32*x^3 - 12*x^2 + 6*x + 1
     if (is_smooth(w110, primes, num_primes) && is_smooth(w111, primes, num_primes)) {
         is_pair[11] = true;
-        // Compute (m11, m11+1).
-        fputs(" 11", outputfile);
-        found = true;
     }
-
-    fputs("\n", outputfile);
 
     mpz_clear(w30);
     mpz_clear(w31);
@@ -989,6 +960,4 @@ bool check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outpu
     mpz_clear(m2);
     mpz_clear(x);   
     mpz_clear(x2);
-
-    return found;
 }

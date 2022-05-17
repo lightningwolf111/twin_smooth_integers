@@ -5,30 +5,25 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "helpers.h"
-
-// number of primes below 32768
-#define NUM_PRIMES 3512
-// smoothness bound
-#define BOUND 32768
-// number of threads
-#define NUM_THREADS 4
-
-// Sieving time
-double sieving_time[NUM_THREADS];
-// Time to check the higher solutions
-double checking_time[NUM_THREADS];
-
-long counter[NUM_THREADS];
+#include "config.h"
 
 int main(int argc, char **argv)
 {
-    long start, end, step;
-    gmp_printf("Start: \n");
-    gmp_scanf("%ld", &start);
-    gmp_printf("End: \n");
-    gmp_scanf("%ld", &end);
-    gmp_printf("Step: \n");
-    gmp_scanf("%ld", &step);
+    // Sieving time
+    double sieving_time[NUM_THREADS];
+    // Time to check the higher solutions
+    double checking_time[NUM_THREADS];
+
+    long counter[NUM_THREADS];
+    long start, end, step, min_bits;
+    printf("Start: ");
+    scanf("%ld", &start);
+    printf("End: ");
+    scanf("%ld", &end);
+    printf("Step: ");
+    scanf("%ld", &step);
+    printf("Minimal output bitsize: ");
+    scanf("%ld", &min_bits);
 
     // optimize finding twin smooths
 
@@ -42,7 +37,7 @@ int main(int argc, char **argv)
     {
         cuts[i] = start + i * sub_interval;
     }
-
+ 
     mpz_t primes[NUM_PRIMES];
     mpz_t b;
     mpz_init_set_si(b, BOUND);
@@ -85,24 +80,35 @@ int main(int argc, char **argv)
             {
                 if ((res[i] == 1) && (res[i + 1] == 1))
                 {
-                    bool found_higher = false;
-                    // printf("smooth pair: %ld \n", i + curr_start);
+                    // Array of booleans for keeping track of whether 
+                    // consecutive solutions correspond to smooth pairs.
+                    bool is_pair[13];                  
+                    // The first number m in the smooth pair (m, m+1).
                     mpz_t m;
                     mpz_init_set_si(m, i + curr_start);
+                    // Bitsize of m.
                     size_t m_bits = mpz_sizeinbase(m, 2);
-                    char m_str[m_bits/3 + 27];
-
-                    
                     // printf("SMOOTH: %ld \n ", i + curr_start);
                     
-                    found_higher = check_higher_solutions(m, primes, NUM_PRIMES, m_str);
-                    if (found_higher) {
-                        mpz_out_str(fp[thread], 10, m);
-                        fputs(m_str, fp[thread]);
-                    } elif (m_bits >= min_bound) {
-                        mpz_out_str(fp[thread], 10, m);
+                    // Check wether higher consecutive solutions also give pairs.
+                    check_higher_solutions(m, primes, NUM_PRIMES, is_pair);
+                    int n = 1;
+                    while ((n*m_bits < min_bits) && (n < 13)) {
+                        n++;
                     }
-
+                    while (!is_pair[n] && (n < 13)) {
+                        n++;
+                    }
+                    if (n < 13) {
+                        mpz_out_str(fp[thread], 10, m);
+                        for (int j = n; j < 13; j++) {
+                            if (is_pair[j]) {
+                                fprintf(fp[thread], " %d", j);
+                            }
+                        }
+                        fputs("\n", fp[thread]);
+                    }
+                
                     mpz_clear(m);
                 }
             }
