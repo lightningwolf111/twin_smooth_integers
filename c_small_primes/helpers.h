@@ -47,12 +47,6 @@ void value_of_fourth_poly(mpz_t m, mpz_t result);
 void smooths_in_range(mpz_t primes[], long min, long max,
 		int num_primes, char* res);
 
-// returns 0 if the pell equation with coefficient d gives no b-smooth pairs,
-// and otherwise returns m where (m, m+1) are b-smooth.
-// requires: d is not a square.
-// result is return parameter. Must be initialized.
-void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes);
-
 // Returns true if and only if x * x - d * y * y == 1.
 bool check_pell(mpz_t x, mpz_t y, mpz_t d);
 
@@ -77,4 +71,5 @@ void generate_file_with_coefficients(char* file_name);
 // correspond to a smooth pair for n = 2,3,4,...,12.
 void check_and_compute_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, FILE *outputfile);
 void check_higher_solutions(mpz_t m, mpz_t primes[], int num_primes, bool is_pair[]);
+void check_higher_solutions_upto_6(mpz_t m, mpz_t primes[], int num_primes, bool is_pair[]);
 

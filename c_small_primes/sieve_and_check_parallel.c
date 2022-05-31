@@ -91,15 +91,18 @@ int main(int argc, char **argv)
                     // printf("SMOOTH: %ld \n ", i + curr_start);
                     
                     // Check wether higher consecutive solutions also give pairs.
-                    check_higher_solutions(m, primes, NUM_PRIMES, is_pair);
+                    //check_higher_solutions(m, primes, NUM_PRIMES, is_pair);
+                    //int n_max = 12;
+                    check_higher_solutions_upto_6(m, primes, NUM_PRIMES, is_pair);
+                    int n_max = 6;
                     int n = 1;
-                    while ((n*m_bits < min_bits) && (n < 13)) {
+                    while ((n*m_bits < min_bits) && (n <= n_max)) {
                         n++;
                     }
-                    while (!is_pair[n] && (n < 13)) {
+                    while (!is_pair[n] && (n <= n_max)) {
                         n++;
                     }
-                    if (n < 13) {
+                    if (n <= n_max) {
                         mpz_out_str(fp[thread], 10, m);
                         for (int j = n; j < 13; j++) {
                             if (is_pair[j]) {

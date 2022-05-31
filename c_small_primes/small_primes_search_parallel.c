@@ -39,6 +39,12 @@ void search(int numFacts, mpz_t minS, mpz_t maxS, mpz_t b, mpz_t primes[]);
 // Puts results in the given file pointer.
 // Just like the above, but leaves all computation in a single thread.
 void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int start[], FILE *fp, mpz_t b, mpz_t primes[], int fixed);
+// returns 0 if the pell equation with coefficient d gives no b-smooth pairs,
+// and otherwise returns m where (m, m+1) are b-smooth.
+// requires: d is not a square.
+// result is return parameter. Must be initialized.
+void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, long *numInRange);
+
 
 int main(int argc, char **argv)
 {
@@ -270,7 +276,7 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
         mpz_init(result);
         // double start_time_solve = clock();
         // printf("[%d] solving\n", thread);
-        solve_pell(current, b, result, primes, NUM_PRIMES);
+        solve_pell(current, b, result, primes, NUM_PRIMES, &numInRange[thread]);
         // solving_time[thread] += clock() - start_time_solve;
 
         counter[thread]++;
@@ -317,4 +323,148 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
             search_sequential(thread, numFacts, minS, maxS, coeff_vector, fp, b, primes, fixed + 1);
         }
     }
+}
+
+void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes, long *numInRange) {
+    // Uses the method of continued fractions, and the recurrence relations on
+    // page 382 of Rosen's book Elementary Number Theory to generate the convergents.
+    // Cuts off when the numerator gets too high to save time.
+
+    clock_t start_time = clock();
+    clock_t solving_time = 0;
+    
+    mpz_t one;
+    mpz_t zero;
+    mpz_t cutoff;
+    mpz_init_set_str(one, "1", 10);
+    mpz_init_set_str(zero, "0", 10);
+    mpz_init_set_str(cutoff, "1", 10);
+    mpz_mul_2exp(cutoff, cutoff, BIT_CUTOFF);
+
+    // lists:
+    mpz_t numerators[MAX_PERIOD];
+    mpz_t denominators[MAX_PERIOD];
+    mpz_t p_k[MAX_PERIOD];
+    mpz_t q_k[MAX_PERIOD];
+    mpz_t a_k[MAX_PERIOD]; // convergents to the square root of d
+
+    // intialization:
+    mpz_init_set(p_k[0], zero);
+    mpz_init_set(q_k[0], one);
+    mpz_init(a_k[0]);
+    mpz_sqrt(a_k[0], d);
+    mpz_init_set(numerators[0], zero);
+    mpz_init_set(numerators[1], one);
+    mpz_init_set(numerators[2], a_k[0]);
+    mpz_init_set(denominators[0], one);
+    mpz_init_set(denominators[1], zero);
+    mpz_init_set(denominators[2], one);
+    int index = 2;
+
+    mpz_t psquared;
+    mpz_init(psquared);
+    mpz_t p_plus_root_d;
+    mpz_init(p_plus_root_d);
+
+    // main loop
+    while(!check_pell(numerators[index], denominators[index], d)) {
+        if (mpz_cmp(numerators[index], cutoff) >= 0) {
+            mpz_set(result, zero);
+            for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
+                mpz_clear(p_k[i]);
+                mpz_clear(q_k[i]);
+                mpz_clear(a_k[i]);
+            }
+            for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
+                mpz_clear(numerators[i]);
+                mpz_clear(denominators[i]);
+            }
+	    solving_time += clock() - start_time;
+            mpz_clear(psquared);
+            mpz_clear(p_plus_root_d);
+	    mpz_clear(one);
+            mpz_clear(zero);
+            mpz_clear(cutoff);
+            return; // this pell equation does not give useful smooths
+        }
+        mpz_init(p_k[index-1]);
+        mpz_init(q_k[index-1]);
+        mpz_init(a_k[index-1]);
+        mpz_init(numerators[index+1]);
+        mpz_init(denominators[index+1]);
+        // generate the next convergent:
+        // p_(k+1)
+        // set_p_k_next(p_k[index-1], a_k[index-2], q_k[index-2], p_k[index-2]);
+        mpz_mul(p_k[index-1], a_k[index-2], q_k[index-2]);
+        mpz_sub(p_k[index-1], p_k[index-1], p_k[index-2]);
+        // q_(k+1)
+        // set_q_k_next(q_k[index-1], d, q_k[index-2], p_k[index-1]);
+        mpz_mul(psquared, p_k[index-1], p_k[index-1]);
+        mpz_sub(q_k[index-1], d, psquared);
+        mpz_divexact(q_k[index-1], q_k[index-1], q_k[index-2]);
+        // a_(k+1)
+        // set_a_k_next(d, p_k[index-1], q_k[index-1]);
+        // use the fact that floor(sqrt(d)) is a_k[0].
+        mpz_add(p_plus_root_d, p_k[index-1], a_k[0]);
+        mpz_fdiv_q(a_k[index-1], p_plus_root_d, q_k[index-1]);
+
+        // generate new numerator and denominator:
+        mpz_mul(numerators[index+1], numerators[index], a_k[index-1]);
+        mpz_add(numerators[index+1], numerators[index+1], numerators[index-1]);
+
+        mpz_mul(denominators[index+1], denominators[index], a_k[index-1]);
+        mpz_add(denominators[index+1], denominators[index+1], denominators[index-1]);
+
+        index++;
+    }
+
+    ////////////////////
+    mpz_t minBound;
+    mpz_init_set_str(minBound, "1", 10);
+    mpz_mul_2exp(minBound, minBound, BIT_CUTOFF - 18); // Set 2^240 bits as the min
+    if (mpz_cmp(numerators[index], minBound) > 0) {
+        *numInRange++;
+    }
+    mpz_clear(minBound);
+    ////////////////////
+
+    if (is_smooth(denominators[index], primes, num_primes)) {
+        mpz_sub(result, numerators[index], one);
+        mpz_divexact_ui(result, result, 2);
+        solving_time += clock() - start_time;
+
+        for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
+            mpz_clear(p_k[i]);
+            mpz_clear(q_k[i]);
+            mpz_clear(a_k[i]);
+        }
+        for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
+            mpz_clear(numerators[i]);
+            mpz_clear(denominators[i]);
+        }
+        mpz_clear(psquared);
+        mpz_clear(p_plus_root_d);
+        mpz_clear(one);
+        mpz_clear(zero);
+        mpz_clear(cutoff);
+        return;
+    }
+    mpz_set(result, zero);
+    solving_time += clock() - start_time;
+
+    for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
+            mpz_clear(p_k[i]);
+            mpz_clear(q_k[i]);
+            mpz_clear(a_k[i]);
+    }
+    for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
+        mpz_clear(numerators[i]);
+        mpz_clear(denominators[i]);
+    }
+    mpz_clear(psquared);
+    mpz_clear(p_plus_root_d);
+    mpz_clear(one);
+    mpz_clear(zero);
+    mpz_clear(cutoff);
+    return; // y was not smooth
 }

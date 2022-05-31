@@ -5,8 +5,6 @@
 #include <string.h>
 #include "helpers.h"
 
-// The number of solutions in the desired range, regardless of whether y was smooth or not
-long numInRange;
 
 void primes_up_to_b(mpz_t* ptr, mpz_t b) {
 	int index = 0;
@@ -216,150 +214,6 @@ bool check_pell(mpz_t x, mpz_t y, mpz_t d) {
     mpz_clear(xsquared);
     mpz_clear(dysquared);
     return false;
-}
-
-void solve_pell(mpz_t d, mpz_t b, mpz_t result, mpz_t primes[], int num_primes) {
-    // Uses the method of continued fractions, and the recurrence relations on
-    // page 382 of Rosen's book Elementary Number Theory to generate the convergents.
-    // Cuts off when the numerator gets too high to save time.
-
-    clock_t start_time = clock();
-    clock_t solving_time = 0;
-    
-    mpz_t one;
-    mpz_t zero;
-    mpz_t cutoff;
-    mpz_init_set_str(one, "1", 10);
-    mpz_init_set_str(zero, "0", 10);
-    mpz_init_set_str(cutoff, "1", 10);
-    mpz_mul_2exp(cutoff, cutoff, BIT_CUTOFF);
-
-    // lists:
-    mpz_t numerators[MAX_PERIOD];
-    mpz_t denominators[MAX_PERIOD];
-    mpz_t p_k[MAX_PERIOD];
-    mpz_t q_k[MAX_PERIOD];
-    mpz_t a_k[MAX_PERIOD]; // convergents to the square root of d
-
-    // intialization:
-    mpz_init_set(p_k[0], zero);
-    mpz_init_set(q_k[0], one);
-    mpz_init(a_k[0]);
-    mpz_sqrt(a_k[0], d);
-    mpz_init_set(numerators[0], zero);
-    mpz_init_set(numerators[1], one);
-    mpz_init_set(numerators[2], a_k[0]);
-    mpz_init_set(denominators[0], one);
-    mpz_init_set(denominators[1], zero);
-    mpz_init_set(denominators[2], one);
-    int index = 2;
-
-    mpz_t psquared;
-    mpz_init(psquared);
-    mpz_t p_plus_root_d;
-    mpz_init(p_plus_root_d);
-
-    // main loop
-    while(!check_pell(numerators[index], denominators[index], d)) {
-        if (mpz_cmp(numerators[index], cutoff) >= 0) {
-            mpz_set(result, zero);
-            for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
-                mpz_clear(p_k[i]);
-                mpz_clear(q_k[i]);
-                mpz_clear(a_k[i]);
-            }
-            for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
-                mpz_clear(numerators[i]);
-                mpz_clear(denominators[i]);
-            }
-	    solving_time += clock() - start_time;
-            mpz_clear(psquared);
-            mpz_clear(p_plus_root_d);
-	    mpz_clear(one);
-            mpz_clear(zero);
-            mpz_clear(cutoff);
-            return; // this pell equation does not give useful smooths
-        }
-        mpz_init(p_k[index-1]);
-        mpz_init(q_k[index-1]);
-        mpz_init(a_k[index-1]);
-        mpz_init(numerators[index+1]);
-        mpz_init(denominators[index+1]);
-        // generate the next convergent:
-        // p_(k+1)
-        // set_p_k_next(p_k[index-1], a_k[index-2], q_k[index-2], p_k[index-2]);
-        mpz_mul(p_k[index-1], a_k[index-2], q_k[index-2]);
-        mpz_sub(p_k[index-1], p_k[index-1], p_k[index-2]);
-        // q_(k+1)
-        // set_q_k_next(q_k[index-1], d, q_k[index-2], p_k[index-1]);
-        mpz_mul(psquared, p_k[index-1], p_k[index-1]);
-        mpz_sub(q_k[index-1], d, psquared);
-        mpz_divexact(q_k[index-1], q_k[index-1], q_k[index-2]);
-        // a_(k+1)
-        // set_a_k_next(d, p_k[index-1], q_k[index-1]);
-        // use the fact that floor(sqrt(d)) is a_k[0].
-        mpz_add(p_plus_root_d, p_k[index-1], a_k[0]);
-        mpz_fdiv_q(a_k[index-1], p_plus_root_d, q_k[index-1]);
-
-        // generate new numerator and denominator:
-        mpz_mul(numerators[index+1], numerators[index], a_k[index-1]);
-        mpz_add(numerators[index+1], numerators[index+1], numerators[index-1]);
-
-        mpz_mul(denominators[index+1], denominators[index], a_k[index-1]);
-        mpz_add(denominators[index+1], denominators[index+1], denominators[index-1]);
-
-        index++;
-    }
-
-    ////////////////////
-    mpz_t minBound;
-    mpz_init_set_str(minBound, "1", 10);
-    mpz_mul_2exp(minBound, minBound, BIT_CUTOFF - 18); // Set 2^240 bits as the min
-    if (mpz_cmp(numerators[index], minBound) > 0) {
-        numInRange++;
-    }
-    mpz_clear(minBound);
-    ////////////////////
-
-    if (is_smooth(denominators[index], primes, num_primes)) {
-        mpz_sub(result, numerators[index], one);
-        mpz_divexact_ui(result, result, 2);
-        solving_time += clock() - start_time;
-
-        for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
-            mpz_clear(p_k[i]);
-            mpz_clear(q_k[i]);
-            mpz_clear(a_k[i]);
-        }
-        for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
-            mpz_clear(numerators[i]);
-            mpz_clear(denominators[i]);
-        }
-        mpz_clear(psquared);
-        mpz_clear(p_plus_root_d);
-        mpz_clear(one);
-        mpz_clear(zero);
-        mpz_clear(cutoff);
-        return;
-    }
-    mpz_set(result, zero);
-    solving_time += clock() - start_time;
-
-    for (int i = 0; i < index - 1; i++) { // clear ints in p_k, q_k, a_k
-            mpz_clear(p_k[i]);
-            mpz_clear(q_k[i]);
-            mpz_clear(a_k[i]);
-    }
-    for (int i = 0; i < index + 1; i++) { // clear ints in numerators and denominators
-        mpz_clear(numerators[i]);
-        mpz_clear(denominators[i]);
-    }
-    mpz_clear(psquared);
-    mpz_clear(p_plus_root_d);
-    mpz_clear(one);
-    mpz_clear(zero);
-    mpz_clear(cutoff);
-    return; // y was not smooth
 }
 
 
@@ -754,6 +608,101 @@ void check_and_compute_higher_solutions(mpz_t m, mpz_t primes[], int num_primes,
     mpz_clear(w71);
     mpz_clear(w110);
     mpz_clear(w111);
+    mpz_clear(m2);
+    mpz_clear(x);   
+    mpz_clear(x2);
+}
+
+void check_higher_solutions_upto_6(mpz_t m, mpz_t primes[], int num_primes, bool is_pair[]) {
+    // The first two are not necessary, but included to have:
+    // is_pair[i] = true if i-th solutions corresponds
+    // to a smooth pair, else is_pair[i] = false.
+    is_pair[0] = true;   
+    is_pair[1] = true;
+    for (int i=2; i<7; i++) {
+        is_pair[i] = false;
+    }
+    // Initialize space for m2 as it might be used for
+    // computing others such as m6, m10 and m12, not purely in the 
+    // power-of-2 chain.
+    mpz_t m2;
+    mpz_init(m2);
+    // Initialize space for wi0, wi1 for i in {3,5}. They are always 
+    // computed to check for smoothness of pairs corresponding to the i-th
+    // solutions.
+    mpz_t w30, w31, w50, w51;
+    mpz_init(w30);
+    mpz_init(w31);
+    mpz_init(w50);
+    mpz_init(w51);
+    
+    // Compute x = 2*m+1 and its square x^2.
+    mpz_t x, x2;
+    mpz_init(x);
+    mpz_init(x2);
+    mpz_set_si(x, 1);
+    mpz_addmul_ui(x, m, 2);
+    mpz_mul(x2, x, x);
+    
+    // Now check smoothness of higher solutions by computing the wi.
+    
+    // Check 2nd solution:
+    // corresponds to smooth pair if w2 = x is smooth.
+    if (is_smooth(x, primes, num_primes)){
+        mpz_t w4;
+        mpz_init(w4);
+        is_pair[2] = true;
+        // Check 4th solution:
+        // corresponds to smooth pair if w4 = 2*x^2-1 is smooth.
+        mpz_add(w4, x2, x2);
+        mpz_sub_ui(w4, w4, 1);
+        if (is_smooth(w4, primes, num_primes)){
+            is_pair[4] = true;
+        }   
+        mpz_clear(w4);     
+    }
+    
+    // Check 3rd solution: 
+    // corresponds to smooth pair if w30 = 2*x-1 and w31 = 2*x + 1 are smooth.
+    mpz_add(w30, x, x);             // w30 = 2*x
+    mpz_add_ui(w31, w30, 1);        // w31 = 2*x + 1
+    mpz_sub_ui(w30, w30, 1);        // w30 = 2*x - 1
+    if (is_smooth(w30, primes, num_primes) && is_smooth(w31, primes, num_primes)) {
+        is_pair[3] = true;
+        // If also the second solution corresponds to a pair, 
+        // check 6th solution.
+        if (is_pair[2]) {
+            mpz_t w6;
+            mpz_init(w6);
+
+            // Check 6th solution: 
+            // corresponds to smooth pair if w6 = 4*x^2 - 3 is smooth.
+            mpz_mul_ui(w6, x2, 4);
+            mpz_sub_ui(w6, w6, 3);        // w6 = 4*x^2 - 3
+            if (is_smooth(w6, primes, num_primes)) {
+                is_pair[6] = true;
+            }
+            mpz_clear(w6);
+        }
+    }
+
+    // Check 5th solution:
+    // corresponds to smooth pair if w50 = 4*x^2-2*x-1 and w51 = 4*x^2+2*x-1
+    // are smooth
+    mpz_mul_ui(w51, x2, 4);     // w51 = 4*x^2
+    mpz_sub_ui(w51, w51, 1);    // w51 = 4*x^2 - 1
+    mpz_mul_ui(w50, x, 2);      // w50 = 2*x
+    mpz_add(w51, w51, w50);     // w51 = 4*x^2 + 2*x - 1
+    mpz_add(w50, w50, w50);     // w50 = 4*x
+    mpz_sub(w50, w51, w50);     // w50 = 4*x^2 - 2*x - 1
+    if (is_smooth(w50, primes, num_primes) && is_smooth(w51, primes, num_primes)) {
+        is_pair[5] = true;
+    }
+
+    mpz_clear(w30);
+    mpz_clear(w31);
+    mpz_clear(w50);
+    mpz_clear(w51);
     mpz_clear(m2);
     mpz_clear(x);   
     mpz_clear(x2);
