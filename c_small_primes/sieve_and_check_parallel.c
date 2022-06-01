@@ -15,13 +15,14 @@ int main(int argc, char **argv)
     double checking_time[NUM_THREADS];
 
     long counter[NUM_THREADS];
-    long start, end, step, min_bits;
+    unsigned long long start, end, step;
+    long min_bits;
     printf("Start: ");
-    scanf("%ld", &start);
+    scanf("%lld", &start);
     printf("End: ");
-    scanf("%ld", &end);
+    scanf("%lld", &end);
     printf("Step: ");
-    scanf("%ld", &step);
+    scanf("%lld", &step);
     printf("Minimal output bitsize: ");
     scanf("%ld", &min_bits);
 
@@ -121,7 +122,7 @@ int main(int argc, char **argv)
 
             if (counter[thread] % 100 == 0)
             {
-                printf("[%d] -> %ld, %ld intervals, sieving: %lfs, checking: %lfs\n",
+                printf("[%d] -> %lld, %ld intervals, sieving: %lfs, checking: %lfs\n",
                        thread, curr_start + step, counter[thread], sieving_time[thread], checking_time[thread]);
             }
         }

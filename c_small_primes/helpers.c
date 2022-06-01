@@ -174,15 +174,15 @@ void value_of_fourth_poly(mpz_t m, mpz_t result) {  // 128*m^4 + 256*m^3 + 160*m
 }
 
 
-void smooths_in_range(mpz_t primes[], long min, long max, int num_primes, char* res) { // including min, excluding max
-	long nums[max - min];
+void smooths_in_range(mpz_t primes[], unsigned long long min, unsigned long long max, int num_primes, char* res) { // including min, excluding max
+	unsigned long long nums[max - min];
 	for (long i = 0; i < max - min; i++) {
 		nums[i] = min + i;
 	}
 	for (int i = 0; i < num_primes; i++) {
-		long div_by = mpz_get_ui(primes[i]);
+		unsigned long long div_by = mpz_get_ui(primes[i]);
 		while (div_by < max) {
-			long mult = min/div_by + (min % div_by != 0);
+			unsigned long long mult = min/div_by + (min % div_by != 0);
 			while (mult * div_by < max) {
 				nums[mult * div_by - min] /= mpz_get_ui(primes[i]);
 				mult += 1;

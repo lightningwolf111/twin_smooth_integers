@@ -44,7 +44,7 @@ void value_of_fourth_poly(mpz_t m, mpz_t result);
 // smooths (and unchanged values otherwise). Res should have length
 // max - min, so that the ith element corresponds to the integer
 // (min + i).
-void smooths_in_range(mpz_t primes[], long min, long max,
+void smooths_in_range(mpz_t primes[], unsigned long long min, unsigned long long max,
 		int num_primes, char* res);
 
 // Returns true if and only if x * x - d * y * y == 1.
