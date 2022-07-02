@@ -219,12 +219,13 @@ void search_sequential(int thread, int numFacts, mpz_t minS, mpz_t maxS, int coe
         if (mpz_cmp_si(result, 0) != 0)
         {
             mpz_out_str(fp, 10, result);
-            fputs("\n", fp);
+            fputs(" 1\n", fp);
             // gmp_printf("Result %Zd coeff: %Zd \n", result, current);
             check_and_compute_higher_solutions(result, primes, NUM_PRIMES, fp);
+            fflush(fp);
         }
         mpz_clear(result);
-        if (counter[thread] % 1000 == 0)
+        if (counter[thread] % 10000 == 0)
         {
             printf("Equations solved by thread %d : %ld\n", thread, counter[thread]);
 
